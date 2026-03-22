@@ -199,16 +199,27 @@ This walks you through configuring credentials, channels, and agent defaults.
 
 > **Note:** The config path is `models.providers.*`, not `providers.*`. Using just `providers.*` will give a validation error.
 
-### Step 4: Set Default Models
+### Step 4: Set Default Model
+
+Use `openclaw models set` with the `provider/model` format:
 
 ```powershell
-openclaw configure
+# Google Gemini (free tier available)
+openclaw models set google/gemini-2.5-pro
+
+# OpenAI
+openclaw models set openai/gpt-4o
+
+# Anthropic
+openclaw models set anthropic/claude-4-sonnet
 ```
 
-Follow the interactive wizard to select your default models. You can also set them directly:
+The provider prefix (`google/`, `openai/`, `anthropic/`) is required. Restart the gateway after changing models.
+
+To see all available models:
 
 ```powershell
-openclaw config set agents.defaults.models '["claude-4-sonnet", "gpt-4o", "gemini-2.5-pro"]'
+openclaw models list
 ```
 
 ---

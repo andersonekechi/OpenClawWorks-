@@ -121,14 +121,20 @@ openclaw onboard
 
 ### Set Your Default Model
 
+Use the `models set` command with the `provider/model` format:
+
 ```powershell
-openclaw configure
+# Google Gemini (free tier available)
+openclaw models set google/gemini-2.5-pro
+
+# Or OpenAI
+openclaw models set openai/gpt-4o
+
+# Or Anthropic
+openclaw models set anthropic/claude-4-sonnet
 ```
 
-Pick a model good at writing. Recommended choices:
-- `gpt-4o` — fast, great at social content
-- `claude-4-sonnet` — excellent for longer posts and thoughtful content
-- `gemini-2.5-pro` — strong all-rounder
+You must include the provider prefix (e.g., `google/`, `openai/`, `anthropic/`). Restart the gateway after changing: `openclaw gateway stop && openclaw gateway start`.
 
 ---
 
@@ -451,9 +457,37 @@ today. Make them insightful and on-brand.
 
 ---
 
-## Step 9: Scheduling and Posting Tools
+## Step 9: Posting to X (Twitter) and Other Platforms
 
-OpenClaw generates the content — you need a tool to schedule and post it. Here are the best options:
+### Important: X/Twitter Is Not a Native Channel
+
+OpenClaw supports many chat channels (Telegram, Discord, WhatsApp, Slack, etc.) but **X/Twitter is not a built-in channel**. There are three ways to post to X:
+
+**Method 1: Browser tool (OpenClaw controls your browser)**
+
+OpenClaw can control a real browser, log into X.com, and post tweets directly:
+
+```powershell
+openclaw browser login
+```
+
+Navigate to X.com and log in. After that, you can instruct OpenClaw to post tweets through the browser during a TUI or agent session.
+
+**Method 2: Telegram bot as your content pipeline**
+
+If you already have a Telegram bot connected to OpenClaw, you can have it generate and deliver tweet drafts to you on Telegram. Then you copy-paste or use a scheduling tool to post to X.
+
+Set up Telegram (if not already done):
+
+```powershell
+openclaw channels login telegram
+```
+
+**Method 3: Scheduling tools (recommended for consistency)**
+
+Use a third-party tool to schedule and auto-post content that OpenClaw generates:
+
+### Scheduling and Posting Tools
 
 ### Free Options
 
