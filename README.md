@@ -4,6 +4,10 @@ Practical guides for setting up and monetizing [OpenClaw](https://openclaw.ai) �
 
 ## Guides
 
+### [Social Media Autopilot — HTML Guide](guide.html)
+
+The only guide newbies need. Clean, designed, no fluff — just the 9 commands to go from zero to auto-posting tweets from Telegram to X via OpenClaw's browser tool. Open `guide.html` in your browser.
+
 ### [Windows 11 Setup Guide](WINDOWS-SETUP.md)
 
 Complete walkthrough for getting OpenClaw running on Windows 11, including:
