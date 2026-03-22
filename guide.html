@@ -478,14 +478,16 @@
     <h2>Log into X in OpenClaw's Browser</h2>
   </div>
   <div class="step-body">
-    <p>OpenClaw has a built-in browser it can control. Log into X.com:</p>
+    <p>Enable the browser, start it, and open X.com:</p>
     <div class="cmd-block">
-      <div class="cmd-label">PowerShell <button class="copy-btn" onclick="copyCmd(this)">Copy</button></div>
-      <div class="cmd-code">openclaw browser login</div>
+      <div class="cmd-label">PowerShell — Run These In Order <button class="copy-btn" onclick="copyCmd(this)">Copy</button></div>
+      <div class="cmd-code">openclaw config set browser.enabled true
+openclaw browser start
+openclaw browser open https://x.com</div>
     </div>
-    <p>A browser window opens. Navigate to <strong>x.com</strong> and log in with your X account. Once logged in, close the browser. OpenClaw remembers the session.</p>
+    <p>A Chrome window opens (OpenClaw uses its own Chrome profile). <strong>Log in to your X account</strong> in that window. Once logged in, leave it open. OpenClaw remembers the session.</p>
     <div class="callout warning-callout">
-      <strong>Important:</strong> Leave the browser session active. Don't log out of X. OpenClaw uses this session to post tweets.
+      <strong>Important:</strong> Don't close the Chrome window or log out of X. OpenClaw controls this browser to post tweets. Restart the gateway after enabling the browser: <code>openclaw gateway stop && openclaw gateway start</code>
     </div>
   </div>
 </div>
@@ -604,7 +606,9 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 npm install -g openclaw@latest
 openclaw onboard --install-daemon
 openclaw channels login telegram
-openclaw browser login
+openclaw config set browser.enabled true
+openclaw browser start
+openclaw browser open https://x.com   <span class="comment"># log in to X in the Chrome window</span>
 
 <span class="comment"># DAILY USE</span>
 openclaw gateway              <span class="comment"># start gateway (or it auto-starts as service)</span>
