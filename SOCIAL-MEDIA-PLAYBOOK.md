@@ -71,13 +71,11 @@ You need an API key from at least one AI provider. For content creation, these a
 2. Sign in with your Google account
 3. Click **Get API Key** > **Create API key**
 4. Copy the key
-5. Set it as an environment variable in PowerShell:
+5. Run:
 
 ```powershell
-[System.Environment]::SetEnvironmentVariable("GEMINI_API_KEY", "paste-your-key-here", "User")
+openclaw config set models.providers.google.apiKey "paste-your-key-here"
 ```
-
-6. **Close and reopen PowerShell** so the variable takes effect.
 
 ### Option B: OpenAI (GPT-4o) — Best for Natural-Sounding Social Content
 
@@ -88,10 +86,8 @@ You need an API key from at least one AI provider. For content creation, these a
 5. Run:
 
 ```powershell
-[System.Environment]::SetEnvironmentVariable("OPENAI_API_KEY", "sk-paste-your-key-here", "User")
+openclaw config set models.providers.openai.apiKey "sk-paste-your-key-here"
 ```
-
-6. **Close and reopen PowerShell.**
 
 ### Option C: Anthropic (Claude) — Best for Thoughtful, Long-Form Content
 
@@ -102,22 +98,26 @@ You need an API key from at least one AI provider. For content creation, these a
 5. Run:
 
 ```powershell
-[System.Environment]::SetEnvironmentVariable("ANTHROPIC_API_KEY", "sk-ant-paste-your-key-here", "User")
+openclaw config set models.providers.anthropic.apiKey "sk-ant-paste-your-key-here"
 ```
 
-6. **Close and reopen PowerShell.**
+### Alternative: `.env` File or Interactive Setup
 
-### Alternative: Interactive Setup
-
-Instead of setting environment variables manually, you can use the interactive wizard:
+If the gateway runs as a service/scheduled task, add keys to `~\.openclaw\.env`:
 
 ```powershell
-openclaw configure --section model
+notepad C:\Users\HP\.openclaw\.env
 ```
 
-This walks you through everything and writes the config correctly.
+Add one key per line (e.g., `ANTHROPIC_API_KEY=sk-ant-your-key`), save, then restart the gateway.
 
-> **Note:** Do not use `openclaw config set providers.*` — the `providers` key is not a valid config path. Use environment variables or `openclaw configure` instead.
+Or use the interactive wizard:
+
+```powershell
+openclaw onboard
+```
+
+> **Note:** The config path is `models.providers.*`, not `providers.*`. Using just `providers.*` gives a validation error.
 
 ### Set Your Default Model
 

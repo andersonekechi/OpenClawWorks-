@@ -156,32 +156,48 @@ This checks your installation and applies any needed fixes. Run it after every u
 
 OpenClaw needs at least one LLM provider to function. There are two ways to set this up:
 
-**Method A: Interactive wizard (recommended)**
+**Method A: Config set (quickest)**
+
+Set API keys directly in the config using the correct path `models.providers.<provider>.apiKey`:
 
 ```powershell
-openclaw configure --section model
-```
+# Google Gemini
+openclaw config set models.providers.google.apiKey "your-gemini-key"
 
-This walks you through setting up API keys and selecting default models.
-
-**Method B: Environment variables**
-
-Set one or more API keys as persistent environment variables:
-
-```powershell
-# Google Gemini (good free tier to start)
-[System.Environment]::SetEnvironmentVariable("GEMINI_API_KEY", "your-gemini-key", "User")
+# Anthropic (Claude)
+openclaw config set models.providers.anthropic.apiKey "sk-ant-your-key"
 
 # OpenAI
-[System.Environment]::SetEnvironmentVariable("OPENAI_API_KEY", "sk-your-key", "User")
-
-# Anthropic
-[System.Environment]::SetEnvironmentVariable("ANTHROPIC_API_KEY", "sk-ant-your-key", "User")
+openclaw config set models.providers.openai.apiKey "sk-your-key"
 ```
 
-Close and reopen PowerShell after setting environment variables so they take effect.
+**Method B: `.env` file (recommended for gateway service)**
 
-> **Note:** Do not use `openclaw config set providers.*` — the `providers` key is not part of the config schema. Use environment variables or `openclaw configure` instead.
+If the gateway runs as a Scheduled Task or daemon, it may not see user environment variables. Add keys to `~\.openclaw\.env` instead:
+
+```powershell
+notepad C:\Users\HP\.openclaw\.env
+```
+
+Add one key per line:
+
+```
+ANTHROPIC_API_KEY=sk-ant-your-key
+OPENAI_API_KEY=sk-your-key
+GEMINI_API_KEY=your-gemini-key
+```
+
+Save and restart the gateway: `openclaw gateway stop` then `openclaw gateway start`.
+
+**Method C: Interactive wizard**
+
+```powershell
+openclaw onboard
+```
+
+This walks you through configuring credentials, channels, and agent defaults.
+
+> **Note:** The config path is `models.providers.*`, not `providers.*`. Using just `providers.*` will give a validation error.
 
 ### Step 4: Set Default Models
 
