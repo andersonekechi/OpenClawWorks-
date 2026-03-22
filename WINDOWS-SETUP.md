@@ -333,7 +333,19 @@ iMessage integration requires macOS or a macOS bridge. Not natively available on
 For direct terminal interaction:
 
 ```powershell
-openclaw chat
+openclaw tui
+```
+
+This opens an interactive terminal chat UI connected to the Gateway. Alternatively, use the browser-based dashboard:
+
+```powershell
+openclaw dashboard
+```
+
+Or send a single message directly:
+
+```powershell
+openclaw agent --message "Hello, what can you help me with?"
 ```
 
 ---
@@ -507,7 +519,7 @@ WSL2 gives you access to the full Linux toolchain while still running on Windows
 | Install service | `openclaw gateway install` |
 | Check memory | `openclaw memory status --deep` |
 | Link WhatsApp | `openclaw channels login whatsapp` |
-| Chat in terminal | `openclaw chat` |
+| Chat in terminal | `openclaw tui` |
 | Dashboard UI | `openclaw dashboard` |
 | View config | `openclaw config get .` |
 | Upgrade | `npm install -g openclaw@latest` |

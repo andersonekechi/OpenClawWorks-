@@ -59,8 +59,8 @@ openclaw configure --section model
 # 5. Start the gateway
 openclaw gateway
 
-# 6. Start chatting
-openclaw chat
+# 6. Start chatting (terminal UI)
+openclaw tui
 ```
 
 ## Links

@@ -165,13 +165,20 @@ openclaw doctor
 openclaw health
 ```
 
-Then test with a quick chat:
+Then test with a quick chat. You have three options:
 
 ```powershell
-openclaw chat
+# Option 1: Interactive terminal UI (recommended)
+openclaw tui
+
+# Option 2: Browser-based dashboard
+openclaw dashboard
+
+# Option 3: Send a single message directly
+openclaw agent --message "Write me a tweet about AI productivity"
 ```
 
-Type something like: "Write me a tweet about AI productivity" — if you get a response, you're ready.
+If you get a response, you're ready.
 
 ---
 
@@ -264,8 +271,10 @@ Save the file. OpenClaw will index it and use it as context for all content gene
 Open a chat session:
 
 ```powershell
-openclaw chat
+openclaw tui
 ```
+
+Or use `openclaw dashboard` to chat in your browser. For single messages, use `openclaw agent --message "your prompt"`.
 
 ### Generate Individual Tweets
 
@@ -388,7 +397,7 @@ This is how you produce a full week of content in one sitting.
 Open OpenClaw:
 
 ```powershell
-openclaw chat
+openclaw tui
 ```
 
 Then run through this sequence:
@@ -466,7 +475,7 @@ OpenClaw generates the content — you need a tool to schedule and post it. Here
 
 ### Workflow: OpenClaw to Scheduler
 
-1. Generate content with `openclaw chat`
+1. Generate content with `openclaw tui` (or `openclaw dashboard`)
 2. Copy posts into your scheduler
 3. Set dates and times
 4. Let the scheduler auto-post
@@ -517,7 +526,7 @@ following.
 
 ## Prompt Templates Library
 
-Copy-paste these into `openclaw chat` whenever you need them.
+Copy-paste these into `openclaw tui` (or the dashboard) whenever you need them.
 
 ### Daily Tweet Generator
 
@@ -708,7 +717,7 @@ Once you're in the X Premium program (requires Premium subscription + enough imp
 
 1. Run `openclaw doctor --fix` right now
 2. Set up your AI provider (Step 2)
-3. Start the gateway and test `openclaw chat`
+3. Start the gateway and test `openclaw tui`
 4. Fill in your `MEMORY.md` brand file (Step 4) — this is critical
 5. Generate your first week of content using the batch workflow (Step 8)
 6. Sign up for Buffer (free) and schedule everything

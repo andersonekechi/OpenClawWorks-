@@ -75,7 +75,7 @@ mkdir C:\Users\HP\.openclaw\workspace\freelance
 ### Workflow
 
 1. Accept a client project
-2. Break the requirements down with OpenClaw: `openclaw chat` then describe the project
+2. Break the requirements down with OpenClaw: `openclaw tui` then describe the project
 3. Have OpenClaw scaffold the project, write code, debug, and iterate
 4. Review and refine the output
 5. Deliver to the client
@@ -197,7 +197,7 @@ Use OpenClaw to help you build products, then sell them.
 ### Workflow
 
 1. Pick a problem people will pay to solve
-2. Use `openclaw chat` to architect the solution
+2. Use `openclaw tui` to architect the solution
 3. Have OpenClaw write the code iteratively
 4. Launch on Product Hunt, Indie Hackers, or relevant communities
 5. Iterate based on feedback
@@ -359,7 +359,7 @@ Use OpenClaw to manage social media at scale.
 ### Workflow
 
 1. Store the client's brand voice in OpenClaw's memory
-2. Use `openclaw chat` to batch-generate a week's worth of content
+2. Use `openclaw tui` to batch-generate a week's worth of content
 3. Review and schedule using tools like Buffer or Hootsuite
 4. Generate monthly performance reports with OpenClaw's help
 5. Handle 5–10 clients simultaneously
@@ -505,7 +505,7 @@ The key: OpenClaw lets you deliver $17K worth of value in a normal work week bec
 3. [ ] Configure at least one AI provider (OpenAI, Anthropic, or Google)
 4. [ ] Set up memory search for persistent context
 5. [ ] Start the Gateway (`openclaw gateway`)
-6. [ ] Try `openclaw chat` and practice prompting
+6. [ ] Try `openclaw tui` and practice prompting
 7. [ ] Pick your first monetization channel from this guide
 8. [ ] Create profiles on 2–3 freelance platforms
 9. [ ] Build a portfolio piece using OpenClaw
