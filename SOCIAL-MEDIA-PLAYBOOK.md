@@ -165,20 +165,28 @@ openclaw doctor
 openclaw health
 ```
 
-Then test with a quick chat. You have three options:
+Then test with a quick chat:
 
 ```powershell
-# Option 1: Interactive terminal UI (recommended)
 openclaw tui
-
-# Option 2: Browser-based dashboard
-openclaw dashboard
-
-# Option 3: Send a single message directly
-openclaw agent --message "Write me a tweet about AI productivity"
 ```
 
-If you get a response, you're ready.
+Once the TUI opens, **type `/deliver on` first** — this enables message delivery to your AI provider (it's off by default). Then type your message and hit Enter.
+
+Alternatively, open the browser-based dashboard:
+
+```powershell
+openclaw dashboard
+```
+
+**Key TUI commands:**
+- `/deliver on` — enable AI responses (do this first!)
+- `/model` — pick which AI model to use
+- `/help` — see all available commands
+- `/new` — start a fresh session
+- `Ctrl+D` — exit the TUI
+
+If you get a response from the AI, you're ready.
 
 ---
 
@@ -274,7 +282,7 @@ Open a chat session:
 openclaw tui
 ```
 
-Or use `openclaw dashboard` to chat in your browser. For single messages, use `openclaw agent --message "your prompt"`.
+Type `/deliver on` first to enable AI responses, then start prompting. Or use `openclaw dashboard` for a browser-based UI.
 
 ### Generate Individual Tweets
 

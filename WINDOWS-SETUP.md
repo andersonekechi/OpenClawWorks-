@@ -336,17 +336,26 @@ For direct terminal interaction:
 openclaw tui
 ```
 
-This opens an interactive terminal chat UI connected to the Gateway. Alternatively, use the browser-based dashboard:
+Once the TUI opens, **type `/deliver on` first** — this enables message delivery to your AI provider (it's off by default). Then type your message and hit Enter.
+
+Alternatively, use the browser-based dashboard:
 
 ```powershell
 openclaw dashboard
 ```
 
-Or send a single message directly:
+**Key TUI commands:**
 
-```powershell
-openclaw agent --message "Hello, what can you help me with?"
-```
+| Command | What It Does |
+|---|---|
+| `/deliver on` | Enable AI responses (do this first!) |
+| `/model` | Pick which AI model to use |
+| `/agent` | List or switch agents |
+| `/session` | Manage sessions |
+| `/new` | Start a fresh session |
+| `/help` | See all commands |
+| `Ctrl+L` | Open model picker |
+| `Ctrl+D` | Exit the TUI |
 
 ---
 
@@ -519,7 +528,9 @@ WSL2 gives you access to the full Linux toolchain while still running on Windows
 | Install service | `openclaw gateway install` |
 | Check memory | `openclaw memory status --deep` |
 | Link WhatsApp | `openclaw channels login whatsapp` |
-| Chat in terminal | `openclaw tui` |
+| Chat in terminal | `openclaw tui` (then `/deliver on`) |
 | Dashboard UI | `openclaw dashboard` |
 | View config | `openclaw config get .` |
+| Check status | `openclaw status` |
+| View logs | `openclaw logs --follow` |
 | Upgrade | `npm install -g openclaw@latest` |

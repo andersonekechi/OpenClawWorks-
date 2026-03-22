@@ -61,10 +61,41 @@ openclaw gateway
 
 # 6. Start chatting (terminal UI)
 openclaw tui
+# Then type: /deliver on
 ```
+
+## Contributing to OpenClaw
+
+OpenClaw is open source and welcomes community contributions. Here's how to get involved:
+
+### Report Issues and Fixes
+
+- **GitHub Issues**: [github.com/openclaw/openclaw/issues](https://github.com/openclaw/openclaw/issues) — report bugs, request features, or help triage
+- **Pull Requests**: [github.com/openclaw/openclaw/pulls](https://github.com/openclaw/openclaw/pulls) — submit fixes and improvements
+- **Discussions**: [github.com/openclaw/openclaw/discussions](https://github.com/openclaw/openclaw/discussions) — ask questions, share ideas
+
+### Contribute Skills and Plugins
+
+- Browse community skills on [ClawHub](https://clawhub.openclaw.ai)
+- Publish your own: `openclaw clawhub publish`
+- Test skills locally: `openclaw skill test <path>`
+
+### Areas Where Help Is Needed
+
+- **Windows support** — testing, bug reports, and fixes for Windows-specific issues
+- **Documentation** — guides, tutorials, and translations
+- **Skills** — build and share reusable skills
+- **Channel adapters** — improve or add messaging platform integrations
+- **Security audits** — run `openclaw security check` and report findings
+
+### This Repo (OpenClawWorks)
+
+This repo contains community-written guides. Contributions welcome — if you find an error or want to add a guide, open a PR.
 
 ## Links
 
 - [OpenClaw Official Site](https://openclaw.ai)
 - [OpenClaw GitHub](https://github.com/openclaw/openclaw)
-- [OpenClaw Documentation](https://openclaws.io)
+- [OpenClaw Documentation](https://docs.openclaw.ai)
+- [OpenClaw CLI Reference](https://docs.openclaw.ai/cli)
+- [ClawHub (Skills Marketplace)](https://clawhub.openclaw.ai)
