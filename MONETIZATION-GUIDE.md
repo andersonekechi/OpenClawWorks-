@@ -454,8 +454,11 @@ OpenClaw itself is free and open-source. Your costs come from the LLM providers.
 
 ```powershell
 # Install Ollama for local inference (free)
-# Then configure OpenClaw to use it
-openclaw config set providers.ollama.baseUrl "http://localhost:11434"
+# Download from https://ollama.com then run:
+ollama pull llama3
+# OpenClaw auto-detects Ollama running on localhost
+# Or configure via the interactive wizard:
+openclaw configure --section model
 ```
 
 Good local models for different tasks:

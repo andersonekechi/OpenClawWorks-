@@ -65,7 +65,21 @@ Make sure there are no critical errors. Warnings about memory search or gateway 
 
 You need an API key from at least one AI provider. For content creation, these are the best options:
 
-### Option A: OpenAI (GPT-4o) — Best for Natural-Sounding Social Content
+### Option A: Google Gemini — Good Free Tier to Start
+
+1. Go to [aistudio.google.com](https://aistudio.google.com)
+2. Sign in with your Google account
+3. Click **Get API Key** > **Create API key**
+4. Copy the key
+5. Set it as an environment variable in PowerShell:
+
+```powershell
+[System.Environment]::SetEnvironmentVariable("GEMINI_API_KEY", "paste-your-key-here", "User")
+```
+
+6. **Close and reopen PowerShell** so the variable takes effect.
+
+### Option B: OpenAI (GPT-4o) — Best for Natural-Sounding Social Content
 
 1. Go to [platform.openai.com](https://platform.openai.com)
 2. Sign up or log in
@@ -74,10 +88,12 @@ You need an API key from at least one AI provider. For content creation, these a
 5. Run:
 
 ```powershell
-openclaw config set providers.openai.apiKey "sk-paste-your-key-here"
+[System.Environment]::SetEnvironmentVariable("OPENAI_API_KEY", "sk-paste-your-key-here", "User")
 ```
 
-### Option B: Anthropic (Claude) — Best for Thoughtful, Long-Form Content
+6. **Close and reopen PowerShell.**
+
+### Option C: Anthropic (Claude) — Best for Thoughtful, Long-Form Content
 
 1. Go to [console.anthropic.com](https://console.anthropic.com)
 2. Sign up or log in
@@ -86,19 +102,22 @@ openclaw config set providers.openai.apiKey "sk-paste-your-key-here"
 5. Run:
 
 ```powershell
-openclaw config set providers.anthropic.apiKey "sk-ant-paste-your-key-here"
+[System.Environment]::SetEnvironmentVariable("ANTHROPIC_API_KEY", "sk-ant-paste-your-key-here", "User")
 ```
 
-### Option C: Google (Gemini) — Good Free Tier to Start
+6. **Close and reopen PowerShell.**
 
-1. Go to [aistudio.google.com](https://aistudio.google.com)
-2. Click **Get API Key**
-3. Copy the key
-4. Run:
+### Alternative: Interactive Setup
+
+Instead of setting environment variables manually, you can use the interactive wizard:
 
 ```powershell
-openclaw config set providers.google.apiKey "paste-your-key-here"
+openclaw configure --section model
 ```
+
+This walks you through everything and writes the config correctly.
+
+> **Note:** Do not use `openclaw config set providers.*` — the `providers` key is not a valid config path. Use environment variables or `openclaw configure` instead.
 
 ### Set Your Default Model
 

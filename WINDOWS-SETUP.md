@@ -154,29 +154,34 @@ This checks your installation and applies any needed fixes. Run it after every u
 
 ### Step 3: Configure Your AI Provider
 
-OpenClaw needs at least one LLM provider to function. Configure your preferred provider:
+OpenClaw needs at least one LLM provider to function. There are two ways to set this up:
+
+**Method A: Interactive wizard (recommended)**
 
 ```powershell
 openclaw configure --section model
 ```
 
-Or set API keys directly:
+This walks you through setting up API keys and selecting default models.
+
+**Method B: Environment variables**
+
+Set one or more API keys as persistent environment variables:
 
 ```powershell
-# Pick one or more providers
-openclaw config set providers.openai.apiKey "sk-your-openai-key"
-openclaw config set providers.anthropic.apiKey "sk-ant-your-anthropic-key"
-openclaw config set providers.google.apiKey "your-gemini-key"
-```
+# Google Gemini (good free tier to start)
+[System.Environment]::SetEnvironmentVariable("GEMINI_API_KEY", "your-gemini-key", "User")
 
-You can also set them as environment variables:
-
-```powershell
-# Persistent environment variables (run in Admin PowerShell)
+# OpenAI
 [System.Environment]::SetEnvironmentVariable("OPENAI_API_KEY", "sk-your-key", "User")
+
+# Anthropic
 [System.Environment]::SetEnvironmentVariable("ANTHROPIC_API_KEY", "sk-ant-your-key", "User")
-[System.Environment]::SetEnvironmentVariable("GEMINI_API_KEY", "your-key", "User")
 ```
+
+Close and reopen PowerShell after setting environment variables so they take effect.
+
+> **Note:** Do not use `openclaw config set providers.*` — the `providers` key is not part of the config schema. Use environment variables or `openclaw configure` instead.
 
 ### Step 4: Set Default Models
 
