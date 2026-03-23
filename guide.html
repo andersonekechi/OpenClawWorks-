@@ -340,18 +340,18 @@
 <div class="hero">
   <span class="hero-emoji">🦞</span>
   <h1>OpenClaw <span>Social Media Autopilot</span></h1>
-  <p>Get tweets from Telegram, post to X automatically, every day on schedule. Only the commands that matter.</p>
+  <p>AI generates your tweets and posts, delivered straight to Telegram. Only the commands that matter.</p>
 </div>
 
 <div class="flow-summary">
   <div class="flow-box">
     <h2>How It Works</h2>
     <div class="flow-chain">
-      <div class="flow-node">🤖 AI generates tweets</div>
+      <div class="flow-node">🤖 AI generates content</div>
       <span class="flow-arrow">→</span>
       <div class="flow-node">📱 Delivered to Telegram</div>
       <span class="flow-arrow">→</span>
-      <div class="flow-node">🌐 Browser posts to X</div>
+      <div class="flow-node">📋 Post to X / LinkedIn / Facebook</div>
     </div>
   </div>
 </div>
@@ -465,29 +465,42 @@
       <div class="cmd-label">PowerShell <button class="copy-btn" onclick="copyCmd(this)">Copy</button></div>
       <div class="cmd-code">openclaw gateway restart</div>
     </div>
-    <p>Now message your bot on Telegram. The AI should reply. You can ask it to generate tweets, posts, or anything.</p>
+    <p>Now message your bot on Telegram. It will show a <strong>pairing code</strong>. Approve it:</p>
+    <div class="cmd-block">
+      <div class="cmd-label">PowerShell <button class="copy-btn" onclick="copyCmd(this)">Copy</button></div>
+      <div class="cmd-code">openclaw pairing approve telegram YOUR_CODE_HERE</div>
+    </div>
+    <p>Replace <code>YOUR_CODE_HERE</code> with the code shown in Telegram. After approving, message the bot again — the AI will reply.</p>
   </div>
 </div>
 
 <div class="divider"><hr></div>
-<div class="section-label"><h3>Connect X (Twitter) via Browser</h3></div>
+<div class="section-label"><h3>Posting to X (Twitter)</h3></div>
 
 <div class="step">
   <div class="step-header">
     <div class="step-number">6</div>
-    <h2>Log into X in OpenClaw's Browser</h2>
+    <h2>Get Content from Telegram to X</h2>
   </div>
   <div class="step-body">
-    <p>Enable the browser, start it, and open X.com:</p>
-    <div class="cmd-block">
-      <div class="cmd-label">PowerShell — Run These In Order <button class="copy-btn" onclick="copyCmd(this)">Copy</button></div>
-      <div class="cmd-code">openclaw config set browser.enabled true
-openclaw browser start
-openclaw browser open https://x.com</div>
-    </div>
-    <p>A Chrome window opens (OpenClaw uses its own Chrome profile). <strong>Log in to your X account</strong> in that window. Once logged in, leave it open. OpenClaw remembers the session.</p>
-    <div class="callout warning-callout">
-      <strong>Important:</strong> Don't close the Chrome window or log out of X. OpenClaw controls this browser to post tweets. Restart the gateway after enabling the browser: <code>openclaw gateway stop && openclaw gateway start</code>
+    <p>Your AI generates content on Telegram. Here's how to get it to X:</p>
+
+    <div class="choice-grid">
+      <div class="choice recommended">
+        <span class="choice-tag">Recommended — Works Now</span>
+        <h3>Buffer (Free Scheduler)</h3>
+        <p>Sign up at <a href="https://buffer.com" style="color:var(--accent)">buffer.com</a> (free). Connect your X account. Copy tweets from Telegram, paste into Buffer, set the time. Buffer auto-posts for you.</p>
+      </div>
+      <div class="choice">
+        <span class="choice-tag">Advanced — Needs Developer Account</span>
+        <h3>X API (Direct Posting)</h3>
+        <p>Apply at <a href="https://developer.x.com" style="color:var(--accent)">developer.x.com</a>. Build a custom OpenClaw skill to post via API. No browser needed, 100% reliable.</p>
+      </div>
+      <div class="choice">
+        <span class="choice-tag">Experimental — WSL2 Recommended</span>
+        <h3>Browser Tool (Auto-Post)</h3>
+        <p>OpenClaw can control a browser to post directly to X. Works best on Linux/WSL2. Windows has known connection issues. Setup: <code>openclaw browser start</code> → <code>openclaw browser open https://x.com</code></p>
+      </div>
     </div>
   </div>
 </div>
@@ -606,9 +619,7 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 npm install -g openclaw@latest
 openclaw onboard --install-daemon
 openclaw channels login telegram
-openclaw config set browser.enabled true
-openclaw browser start
-openclaw browser open https://x.com   <span class="comment"># log in to X in the Chrome window</span>
+openclaw pairing approve telegram CODE  <span class="comment"># approve when bot shows pairing code</span>
 
 <span class="comment"># DAILY USE</span>
 openclaw gateway              <span class="comment"># start gateway (or it auto-starts as service)</span>
