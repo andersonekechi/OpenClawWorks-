@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OpenClaw Social Media Autopilot — Setup Guide</title>
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #12121a;
+    --surface-2: #1a1a26;
+    --border: #2a2a3a;
+    --accent: #e74c3c;
+    --accent-glow: rgba(231, 76, 60, 0.15);
+    --accent-2: #ff6b6b;
+    --text: #e8e6e3;
+    --text-dim: #8a8a9a;
+    --text-bright: #ffffff;
+    --success: #2ecc71;
+    --warning: #f39c12;
+    --code-bg: #0d0d14;
+    --code-border: #1e1e2e;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    min-height: 100vh;
+  }
+
+  .hero {
+    text-align: center;
+    padding: 80px 24px 60px;
+    background: linear-gradient(180deg, rgba(231,76,60,0.08) 0%, transparent 100%);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .hero-emoji { font-size: 72px; margin-bottom: 16px; display: block; }
+
+  .hero h1 {
+    font-size: clamp(28px, 5vw, 48px);
+    font-weight: 800;
+    color: var(--text-bright);
+    letter-spacing: -1px;
+    margin-bottom: 12px;
+  }
+
+  .hero h1 span { color: var(--accent); }
+
+  .hero p {
+    font-size: 18px;
+    color: var(--text-dim);
+    max-width: 540px;
+    margin: 0 auto;
+  }
+
+  .container {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  .flow-summary {
+    margin: 48px auto;
+    max-width: 720px;
+    padding: 0 24px;
+  }
+
+  .flow-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px;
+    text-align: center;
+  }
+
+  .flow-box h2 {
+    font-size: 16px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--accent);
+    margin-bottom: 20px;
+  }
+
+  .flow-chain {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .flow-node {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 20px;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-bright);
+  }
+
+  .flow-arrow { color: var(--accent); font-size: 20px; font-weight: bold; }
+
+  .step {
+    margin: 48px auto;
+    max-width: 720px;
+    padding: 0 24px;
+  }
+
+  .step-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  .step-number {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: white;
+    font-size: 20px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .step-header h2 {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text-bright);
+  }
+
+  .step-body {
+    margin-left: 64px;
+  }
+
+  .step-body p {
+    margin-bottom: 16px;
+    color: var(--text);
+  }
+
+  .step-body p.note {
+    color: var(--text-dim);
+    font-size: 14px;
+    margin-top: -8px;
+  }
+
+  .cmd-block {
+    background: var(--code-bg);
+    border: 1px solid var(--code-border);
+    border-radius: 12px;
+    margin: 16px 0;
+    overflow: hidden;
+  }
+
+  .cmd-label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    background: var(--surface-2);
+    border-bottom: 1px solid var(--code-border);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-dim);
+  }
+
+  .copy-btn {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text-dim);
+    font-size: 12px;
+    padding: 4px 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .copy-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .copy-btn.copied {
+    border-color: var(--success);
+    color: var(--success);
+  }
+
+  .cmd-code {
+    padding: 16px 20px;
+    font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+    font-size: 14px;
+    line-height: 1.8;
+    color: var(--accent-2);
+    white-space: pre-wrap;
+    word-break: break-all;
+    overflow-x: auto;
+  }
+
+  .cmd-code .comment {
+    color: var(--text-dim);
+  }
+
+  .choice-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin: 16px 0;
+  }
+
+  .choice {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    transition: border-color 0.2s;
+  }
+
+  .choice.recommended {
+    border-color: var(--accent);
+    box-shadow: 0 0 20px var(--accent-glow);
+  }
+
+  .choice-tag {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 3px 10px;
+    border-radius: 100px;
+    margin-bottom: 8px;
+  }
+
+  .choice.recommended .choice-tag {
+    background: var(--accent);
+    color: white;
+  }
+
+  .choice:not(.recommended) .choice-tag {
+    background: var(--surface-2);
+    color: var(--text-dim);
+  }
+
+  .choice h3 {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text-bright);
+    margin-bottom: 4px;
+  }
+
+  .choice p {
+    font-size: 14px;
+    color: var(--text-dim);
+  }
+
+  .divider {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  .divider hr {
+    border: none;
+    border-top: 1px solid var(--border);
+  }
+
+  .section-label {
+    max-width: 720px;
+    margin: 48px auto 0;
+    padding: 0 24px;
+  }
+
+  .section-label h3 {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--text-dim);
+    margin-bottom: -24px;
+  }
+
+  .callout {
+    background: var(--surface);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 12px 12px 0;
+    padding: 16px 20px;
+    margin: 16px 0;
+    font-size: 14px;
+    color: var(--text);
+  }
+
+  .callout strong { color: var(--text-bright); }
+
+  .success-callout {
+    background: rgba(46, 204, 113, 0.08);
+    border-left-color: var(--success);
+  }
+
+  .warning-callout {
+    background: rgba(243, 156, 18, 0.08);
+    border-left-color: var(--warning);
+  }
+
+  footer {
+    text-align: center;
+    padding: 60px 24px;
+    color: var(--text-dim);
+    font-size: 14px;
+    border-top: 1px solid var(--border);
+    margin-top: 60px;
+  }
+
+  footer a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  footer a:hover { text-decoration: underline; }
+
+  @media (max-width: 600px) {
+    .step-body { margin-left: 0; margin-top: 12px; }
+    .step-header { flex-direction: column; align-items: flex-start; }
+    .flow-chain { flex-direction: column; }
+    .flow-arrow { transform: rotate(90deg); }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <span class="hero-emoji">🦞</span>
+  <h1>OpenClaw <span>Social Media Autopilot</span></h1>
+  <p>AI generates your tweets and posts, delivered straight to Telegram. Only the commands that matter.</p>
+</div>
+
+<div class="flow-summary">
+  <div class="flow-box">
+    <h2>How It Works</h2>
+    <div class="flow-chain">
+      <div class="flow-node">🤖 AI generates content</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-node">📱 Delivered to Telegram</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-node">📋 Post to X / LinkedIn / Facebook</div>
+    </div>
+  </div>
+</div>
+
+<div class="section-label"><h3>Installation</h3></div>
+
+<div class="step">
+  <div class="step-header">
+    <div class="step-number">1</div>
+    <h2>Install OpenClaw</h2>
+  </div>
+  <div class="step-body">
+    <p>Open PowerShell <strong>as Administrator</strong> and run:</p>
+    <div class="cmd-block">
+      <div class="cmd-label">PowerShell (Admin) <button class="copy-btn" onclick="copyCmd(this)">Copy</button></div>
+      <div class="cmd-code">Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser</div>
+    </div>
+    <div class="cmd-block">
+      <div class="cmd-label">PowerShell <button class="copy-btn" onclick="copyCmd(this)">Copy</button></div>
+      <div class="cmd-code">npm install -g openclaw@latest</div>
+    </div>
+    <p class="note">Requires Node.js 22+. Install Node first if needed: <code>winget install OpenJS.NodeJS.LTS</code></p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-header">
+    <div class="step-number">2</div>
+    <h2>Run Onboarding</h2>
+  </div>
+  <div class="step-body">
+    <p>This wizard sets up everything — API key, gateway, and agent config:</p>
+    <div class="cmd-block">
+      <div class="cmd-label">PowerShell <button class="copy-btn" onclick="copyCmd(this)">Copy</button></div>
+      <div class="cmd-code">openclaw onboard --install-daemon</div>
+    </div>
+
+    <p>When it asks for a provider, pick one:</p>
+    <div class="choice-grid">
+      <div class="choice recommended">
+        <span class="choice-tag">Recommended — Free Tier</span>
+        <h3>Google Gemini</h3>
+        <p>Get your key at <a href="https://aistudio.google.com" style="color:var(--accent)">aistudio.google.com</a> → Get API Key</p>
+      </div>
+      <div class="choice">
+        <span class="choice-tag">Alternative — Paid</span>
+        <h3>Anthropic (Claude)</h3>
+        <p>Get your key at <a href="https://console.anthropic.com" style="color:var(--accent)">console.anthropic.com</a> → API Keys. Requires credit balance.</p>
+      </div>
+      <div class="choice">
+        <span class="choice-tag">Alternative — Paid</span>
+        <h3>OpenAI (GPT)</h3>
+        <p>Get your key at <a href="https://platform.openai.com" style="color:var(--accent)">platform.openai.com</a> → API Keys</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-header">
+    <div class="step-number">3</div>
+    <h2>Verify It Works</h2>
+  </div>
+  <div class="step-body">
+    <p>Check the gateway is running and open the dashboard:</p>
+    <div class="cmd-block">
+      <div class="cmd-label">PowerShell <button class="copy-btn" onclick="copyCmd(this)">Copy</button></div>
+      <div class="cmd-code">openclaw gateway status</div>
+    </div>
+    <div class="cmd-block">
+      <div class="cmd-label">PowerShell <button class="copy-btn" onclick="copyCmd(this)">Copy</button></div>
+      <div class="cmd-code">openclaw dashboard</div>
+    </div>
+    <p>The dashboard opens in your browser. Type a test message. If the AI replies, you're set.</p>
+    <div class="callout success-callout">
+      <strong>Checkpoint:</strong> If you got a reply in the dashboard, your AI is working. Everything below connects it to Telegram and X.
+    </div>
+  </div>
+</div>
+
+<div class="divider"><hr></div>
+<div class="section-label"><h3>Connect Telegram</h3></div>
+
+<div class="step">
+  <div class="step-header">
+    <div class="step-number">4</div>
+    <h2>Create a Telegram Bot</h2>
+  </div>
+  <div class="step-body">
+    <p>Open Telegram, message <a href="https://t.me/BotFather" style="color:var(--accent)">@BotFather</a>, and send:</p>
+    <div class="cmd-block">
+      <div class="cmd-label">Telegram → @BotFather</div>
+      <div class="cmd-code">/newbot</div>
+    </div>
+    <p>Follow the prompts. BotFather gives you a <strong>bot token</strong> like <code>7123456789:AAH...</code>. Copy it.</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-header">
+    <div class="step-number">5</div>
+    <h2>Connect Telegram to OpenClaw</h2>
+  </div>
+  <div class="step-body">
+    <div class="cmd-block">
+      <div class="cmd-label">PowerShell <button class="copy-btn" onclick="copyCmd(this)">Copy</button></div>
+      <div class="cmd-code">openclaw channels login telegram</div>
+    </div>
+    <p>Paste your bot token when prompted. Then restart the gateway:</p>
+    <div class="cmd-block">
+      <div class="cmd-label">PowerShell <button class="copy-btn" onclick="copyCmd(this)">Copy</button></div>
+      <div class="cmd-code">openclaw gateway restart</div>
+    </div>
+    <p>Now message your bot on Telegram. It will show a <strong>pairing code</strong>. Approve it:</p>
+    <div class="cmd-block">
+      <div class="cmd-label">PowerShell <button class="copy-btn" onclick="copyCmd(this)">Copy</button></div>
+      <div class="cmd-code">openclaw pairing approve telegram YOUR_CODE_HERE</div>
+    </div>
+    <p>Replace <code>YOUR_CODE_HERE</code> with the code shown in Telegram. After approving, message the bot again — the AI will reply.</p>
+  </div>
+</div>
+
+<div class="divider"><hr></div>
+<div class="section-label"><h3>Posting to X (Twitter)</h3></div>
+
+<div class="step">
+  <div class="step-header">
+    <div class="step-number">6</div>
+    <h2>Get Content from Telegram to X</h2>
+  </div>
+  <div class="step-body">
+    <p>Your AI generates content on Telegram. Here's how to get it to X:</p>
+
+    <div class="choice-grid">
+      <div class="choice recommended">
+        <span class="choice-tag">Recommended — Works Now</span>
+        <h3>Buffer (Free Scheduler)</h3>
+        <p>Sign up at <a href="https://buffer.com" style="color:var(--accent)">buffer.com</a> (free). Connect your X account. Copy tweets from Telegram, paste into Buffer, set the time. Buffer auto-posts for you.</p>
+      </div>
+      <div class="choice">
+        <span class="choice-tag">Advanced — Needs Developer Account</span>
+        <h3>X API (Direct Posting)</h3>
+        <p>Apply at <a href="https://developer.x.com" style="color:var(--accent)">developer.x.com</a>. Build a custom OpenClaw skill to post via API. No browser needed, 100% reliable.</p>
+      </div>
+      <div class="choice">
+        <span class="choice-tag">Experimental — WSL2 Recommended</span>
+        <h3>Browser Tool (Auto-Post)</h3>
+        <p>OpenClaw can control a browser to post directly to X. Works best on Linux/WSL2. Windows has known connection issues. Setup: <code>openclaw browser start</code> → <code>openclaw browser open https://x.com</code></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"><hr></div>
+<div class="section-label"><h3>Set Up the Daily Routine</h3></div>
+
+<div class="step">
+  <div class="step-header">
+    <div class="step-number">7</div>
+    <h2>Create Your Brand Memory</h2>
+  </div>
+  <div class="step-body">
+    <p>Tell OpenClaw who you are so all content matches your voice:</p>
+    <div class="cmd-block">
+      <div class="cmd-label">PowerShell <button class="copy-btn" onclick="copyCmd(this)">Copy</button></div>
+      <div class="cmd-code">notepad C:\Users\HP\.openclaw\workspace\MEMORY.md</div>
+    </div>
+    <p>Paste and customize:</p>
+    <div class="cmd-block">
+      <div class="cmd-label">MEMORY.md Template</div>
+      <div class="cmd-code"><span class="comment"># My Brand</span>
+
+<span class="comment">## Who I Am</span>
+Name: [Your Name]
+Niche: [e.g., AI tools, productivity, tech]
+Tone: Casual, confident, helpful
+
+<span class="comment">## Target Audience</span>
+Young professionals who want to use AI to work smarter
+
+<span class="comment">## Content Pillars</span>
+1. AI tools and how to use them
+2. Productivity tips
+3. Making money with tech
+4. My personal journey
+
+<span class="comment">## Rules</span>
+- Tweets: under 270 characters, punchy, hook first
+- LinkedIn: professional but not stiff, 150-250 words
+- Facebook: conversational, end with a question</div>
+    </div>
+    <p>Save and close. OpenClaw indexes this automatically.</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-header">
+    <div class="step-number">8</div>
+    <h2>Schedule Daily Tweet Generation</h2>
+  </div>
+  <div class="step-body">
+    <p>Set up a daily cron job that generates and delivers tweets to Telegram:</p>
+    <div class="cmd-block">
+      <div class="cmd-label">PowerShell <button class="copy-btn" onclick="copyCmd(this)">Copy</button></div>
+      <div class="cmd-code">openclaw cron --help</div>
+    </div>
+    <p>Or message your Telegram bot daily with prompts like:</p>
+    <div class="cmd-block">
+      <div class="cmd-label">Message to Your Telegram Bot</div>
+      <div class="cmd-code">Generate my 3 tweets for today.
+
+1 value tweet teaching something about AI
+1 engagement tweet asking a question
+1 personal observation
+
+Under 270 characters each. Hook in the first line.
+Match my brand voice.</div>
+    </div>
+    <p>The AI generates the tweets and sends them back to you on Telegram.</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-header">
+    <div class="step-number">9</div>
+    <h2>Post to X via Browser</h2>
+  </div>
+  <div class="step-body">
+    <p>After getting your tweets on Telegram, tell the AI to post them:</p>
+    <div class="cmd-block">
+      <div class="cmd-label">Message to Your Telegram Bot</div>
+      <div class="cmd-code">Post this to X right now using the browser:
+
+[paste your tweet here]</div>
+    </div>
+    <p>Or schedule it for the right time:</p>
+    <div class="cmd-block">
+      <div class="cmd-label">Message to Your Telegram Bot</div>
+      <div class="cmd-code">Post these 3 tweets to X today using the browser.
+Post the first at 9 AM, second at 12 PM, third at 5 PM.
+
+1. [first tweet]
+2. [second tweet]
+3. [third tweet]</div>
+    </div>
+    <div class="callout">
+      <strong>How it works:</strong> OpenClaw opens its built-in browser, navigates to X.com (where you're already logged in), types the tweet, and hits post. It controls the browser like a real person would.
+    </div>
+  </div>
+</div>
+
+<div class="divider"><hr></div>
+<div class="section-label"><h3>All Commands — Quick Reference</h3></div>
+
+<div class="step">
+  <div class="step-header">
+    <div class="step-number">★</div>
+    <h2>Cheat Sheet</h2>
+  </div>
+  <div class="step-body">
+    <div class="cmd-block">
+      <div class="cmd-label">Every Command You Need</div>
+      <div class="cmd-code"><span class="comment"># ONE-TIME SETUP</span>
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+npm install -g openclaw@latest
+openclaw onboard --install-daemon
+openclaw channels login telegram
+openclaw pairing approve telegram CODE  <span class="comment"># approve when bot shows pairing code</span>
+
+<span class="comment"># DAILY USE</span>
+openclaw gateway              <span class="comment"># start gateway (or it auto-starts as service)</span>
+openclaw dashboard            <span class="comment"># chat in browser</span>
+openclaw tui                  <span class="comment"># chat in terminal (type /deliver on first)</span>
+
+<span class="comment"># TROUBLESHOOTING</span>
+openclaw doctor --fix         <span class="comment"># fix issues</span>
+openclaw gateway status       <span class="comment"># check gateway</span>
+openclaw health               <span class="comment"># check connection</span>
+openclaw models status        <span class="comment"># check model + auth</span>
+openclaw logs --follow        <span class="comment"># live logs</span></div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p>
+    <a href="https://github.com/openclaw/openclaw">OpenClaw GitHub</a> ·
+    <a href="https://docs.openclaw.ai">Official Docs</a> ·
+    <a href="https://docs.openclaw.ai/channels/telegram">Telegram Setup Docs</a> ·
+    <a href="https://docs.openclaw.ai/tools/browser-login">Browser Tool Docs</a>
+  </p>
+  <p style="margin-top:12px; color: var(--text-dim);">OpenClawWorks — Community guides for OpenClaw</p>
+</footer>
+
+<script>
+function copyCmd(btn) {
+  const code = btn.closest('.cmd-block').querySelector('.cmd-code');
+  const text = code.innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.textContent = 'Copy';
+      btn.classList.remove('copied');
+    }, 2000);
+  });
+}
+</script>
+
+</body>
+</html>
