@@ -19,6 +19,9 @@ from telegram.ext import (
     CallbackQueryHandler,
     CommandHandler,
     ContextTypes,
+    ConversationHandler,
+    MessageHandler,
+    filters,
 )
 
 from scanner.keywords import PostCategory, CATEGORY_DISPLAY
@@ -32,6 +35,59 @@ from x_poster import get_all_credentials as get_x_credentials, verify_credential
 from scanner.templates import generate_tweet
 
 load_dotenv()
+# ─── .env writer for X key setup from Telegram ───────────────────────────────
+
+ENV_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")
+
+def _env_read() -> dict:
+    """Read .env into a dict (preserves all existing keys)."""
+    pairs = {}
+    try:
+        with open(ENV_PATH, "r") as f:
+            for line in f:
+                line = line.strip()
+                if line and not line.startswith("#") and "=" in line:
+                    k, _, v = line.partition("=")
+                    pairs[k.strip()] = v.strip()
+    except FileNotFoundError:
+        pass
+    return pairs
+
+
+def _env_write(pairs: dict) -> None:
+    """Write dict back to .env, preserving comment blocks."""
+    try:
+        with open(ENV_PATH, "r") as f:
+            raw = f.read()
+    except FileNotFoundError:
+        raw = ""
+
+    for key, value in pairs.items():
+        import re as _re
+        pattern = _re.compile(rf"^{_re.escape(key)}=.*$", _re.MULTILINE)
+        replacement = f"{key}={value}"
+        if pattern.search(raw):
+            raw = pattern.sub(replacement, raw)
+        else:
+            raw = raw.rstrip() + f"\n{key}={value}\n"
+
+    with open(ENV_PATH, "w") as f:
+        f.write(raw)
+
+    # Hot-reload into os.environ so bot sees them immediately
+    for key, value in pairs.items():
+        os.environ[key] = value
+
+
+# Conversation states for /xsetup wizard
+XS_ACCOUNT   = 0
+XS_API_KEY   = 1
+XS_API_SEC   = 2
+XS_ACC_TOK   = 3
+XS_ACC_SEC   = 4
+
+# Temporary storage for keys being entered (per user)
+_xsetup_temp: dict = {}
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("bacehelpr")
@@ -628,6 +684,197 @@ async def _show_xsetup_menu(target):
         await target.message.reply_text(text, parse_mode="HTML", reply_markup=kb, disable_web_page_preview=True)
 
 
+
+# ─── X API Key Setup Wizard ───────────────────────────────────────────────────
+
+async def xsetup_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Entry point: /xsetup — starts the X API key wizard."""
+    if not _is_admin(update):
+        await _deny(update)
+        return ConversationHandler.END
+
+    creds_list = get_x_credentials()
+    lines = ["<b>X Account Setup Wizard</b>\n"]
+
+    if creds_list:
+        for c in creds_list:
+            lines.append(f"  ✅ {c.label} already connected")
+        lines.append("")
+
+    lines.append(
+        "Which account slot do you want to set up?\n\n"
+        "Reply <b>1</b> for Account 1 (17 posts/day)\n"
+        "Reply <b>2</b> for Account 2 (+17 posts/day = 34/day total)\n"
+        "Reply <b>3</b> for Account 3 (+17 more)\n\n"
+        "Or type /cancel to exit."
+    )
+    await update.message.reply_text("\n".join(lines), parse_mode="HTML")
+    return XS_ACCOUNT
+
+
+async def xsetup_account(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """User chose account slot number."""
+    if not _is_admin(update):
+        return ConversationHandler.END
+    text = update.message.text.strip()
+    if text not in ("1", "2", "3", "4", "5"):
+        await update.message.reply_text("Please reply with a number: 1, 2, or 3")
+        return XS_ACCOUNT
+    user_id = update.effective_user.id
+    _xsetup_temp[user_id] = {"slot": text}
+    await update.message.reply_text(
+        f"Setting up <b>Account {text}</b>.\n\n"
+        f"<b>Step 1 of 4</b>\n\n"
+        "Go to <a href=\"https://developer.x.com\">developer.x.com</a>, sign in, "
+        "open your app → Keys and Tokens.\n\n"
+        "Paste your <b>API Key</b> (also called Consumer Key):\n\n"
+        "<i>It looks like: AbCdEfGhIjKlMnOpQrStUvWxYz1234567890ABCDE</i>",
+        parse_mode="HTML",
+        disable_web_page_preview=True,
+    )
+    return XS_API_KEY
+
+
+async def xsetup_api_key(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """User pasted API Key."""
+    if not _is_admin(update):
+        return ConversationHandler.END
+    key = update.message.text.strip()
+    user_id = update.effective_user.id
+    _xsetup_temp.setdefault(user_id, {})["api_key"] = key
+    # Delete the message so key isn't visible in chat
+    try:
+        await update.message.delete()
+    except Exception:
+        pass
+    await update.message.reply_text(
+        "✅ API Key saved.\n\n"
+        "<b>Step 2 of 4</b>\n\n"
+        "Paste your <b>API Secret</b> (also called Consumer Secret):\n\n"
+        "<i>Longer string, starts similar to the key</i>",
+        parse_mode="HTML",
+    )
+    return XS_API_SEC
+
+
+async def xsetup_api_secret(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """User pasted API Secret."""
+    if not _is_admin(update):
+        return ConversationHandler.END
+    key = update.message.text.strip()
+    user_id = update.effective_user.id
+    _xsetup_temp.setdefault(user_id, {})["api_secret"] = key
+    try:
+        await update.message.delete()
+    except Exception:
+        pass
+    await update.message.reply_text(
+        "✅ API Secret saved.\n\n"
+        "<b>Step 3 of 4</b>\n\n"
+        "Paste your <b>Access Token</b>:\n\n"
+        "<i>Looks like: 123456789-AbCdEfGhIjKlMnOpQrStUvWxYz1234567890</i>\n\n"
+        "If you don\'t see it, click <b>Generate</b> next to Access Token in developer.x.com",
+        parse_mode="HTML",
+    )
+    return XS_ACC_TOK
+
+
+async def xsetup_access_token(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """User pasted Access Token."""
+    if not _is_admin(update):
+        return ConversationHandler.END
+    key = update.message.text.strip()
+    user_id = update.effective_user.id
+    _xsetup_temp.setdefault(user_id, {})["access_token"] = key
+    try:
+        await update.message.delete()
+    except Exception:
+        pass
+    await update.message.reply_text(
+        "✅ Access Token saved.\n\n"
+        "<b>Step 4 of 4 — Last one!</b>\n\n"
+        "Paste your <b>Access Token Secret</b>:\n\n"
+        "<i>Shorter string shown right below the Access Token</i>",
+        parse_mode="HTML",
+    )
+    return XS_ACC_SEC
+
+
+async def xsetup_access_secret(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """User pasted Access Token Secret — save everything and verify."""
+    if not _is_admin(update):
+        return ConversationHandler.END
+    key = update.message.text.strip()
+    user_id = update.effective_user.id
+    data = _xsetup_temp.get(user_id, {})
+    data["access_token_secret"] = key
+    try:
+        await update.message.delete()
+    except Exception:
+        pass
+
+    slot = data.get("slot", "1")
+    await update.message.reply_text(
+        f"Saving Account {slot} credentials and verifying with X...\n\n"
+        "⏳ Please wait a moment...",
+        parse_mode="HTML",
+    )
+
+    # Save to .env
+    _env_write({
+        f"X_API_KEY_{slot}":              data.get("api_key", ""),
+        f"X_API_SECRET_{slot}":           data.get("api_secret", ""),
+        f"X_ACCESS_TOKEN_{slot}":         data.get("access_token", ""),
+        f"X_ACCESS_TOKEN_SECRET_{slot}":  data.get("access_token_secret", ""),
+    })
+
+    # Reload and verify
+    from x_poster import load_credentials, verify_credentials
+    creds = load_credentials(slot)
+    result = await asyncio.to_thread(verify_credentials, creds)
+
+    if result.get("success"):
+        username = result.get("username", "unknown")
+        total_accounts = len(get_x_credentials())
+        max_per_day = total_accounts * 17
+        await update.message.reply_text(
+            f"✅ <b>Account {slot} connected!</b>\n\n"
+            f"Verified as: <b>@{username}</b>\n\n"
+            f"Total accounts: <b>{total_accounts}</b>\n"
+            f"Max posts/day: <b>{max_per_day}</b> (FREE)\n\n"
+            "Now tap the <b>Auto-Post: OFF</b> button in the menu to start posting!",
+            parse_mode="HTML",
+            reply_markup=_main_menu_keyboard(),
+        )
+    else:
+        err = result.get("error", "unknown error")
+        await update.message.reply_text(
+            f"❌ <b>Verification failed for Account {slot}</b>\n\n"
+            f"Error: <code>{err}</code>\n\n"
+            "The keys were saved. Common fixes:\n"
+            "• Make sure app permissions are set to <b>Read and Write</b>\n"
+            "• Regenerate Access Token after changing permissions\n"
+            "• Check you copied the full key (no spaces)\n\n"
+            "Run /xsetup to try again.",
+            parse_mode="HTML",
+        )
+
+    # Clean up temp storage
+    _xsetup_temp.pop(user_id, None)
+    return ConversationHandler.END
+
+
+async def xsetup_cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """User cancelled setup."""
+    user_id = update.effective_user.id
+    _xsetup_temp.pop(user_id, None)
+    await update.message.reply_text(
+        "Setup cancelled. Use /xsetup to start again anytime.",
+        reply_markup=_main_menu_keyboard(),
+    )
+    return ConversationHandler.END
+
+
 async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not _is_admin(update):
         return await _deny(update)
@@ -673,7 +920,19 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # X Setup menu
     if data == "xsetup_menu":
-        await _show_xsetup_menu(query)
+        await query.edit_message_text(
+            "Tap <b>Connect X Account</b> below, or send /xsetup to start the guided setup wizard.\n\n"
+            "The wizard walks you through pasting each key one at a time — no SSH needed.",
+            parse_mode="HTML",
+            reply_markup=InlineKeyboardMarkup([
+                [InlineKeyboardButton("🔑 Start Key Setup Wizard", callback_data="xsetup_start_wizard")],
+                [InlineKeyboardButton("< Menu", callback_data="menu")],
+            ])
+        )
+        return
+
+    if data == "xsetup_start_wizard":
+        await query.message.reply_text("Starting wizard — send /xsetup")
         return
 
     # X Setup: verify account 1 or 2
@@ -889,6 +1148,20 @@ def main():
     app.add_handler(CommandHandler("builds", builds_cmd))
     app.add_handler(CommandHandler("articles", articles_cmd))
     app.add_handler(CommandHandler("stats", stats_cmd))
+    # X API Key setup wizard (conversation)
+    xsetup_conv = ConversationHandler(
+        entry_points=[CommandHandler("xsetup", xsetup_start)],
+        states={
+            XS_ACCOUNT: [MessageHandler(filters.TEXT & ~filters.COMMAND, xsetup_account)],
+            XS_API_KEY: [MessageHandler(filters.TEXT & ~filters.COMMAND, xsetup_api_key)],
+            XS_API_SEC: [MessageHandler(filters.TEXT & ~filters.COMMAND, xsetup_api_secret)],
+            XS_ACC_TOK: [MessageHandler(filters.TEXT & ~filters.COMMAND, xsetup_access_token)],
+            XS_ACC_SEC: [MessageHandler(filters.TEXT & ~filters.COMMAND, xsetup_access_secret)],
+        },
+        fallbacks=[CommandHandler("cancel", xsetup_cancel)],
+        allow_reentry=True,
+    )
+    app.add_handler(xsetup_conv)
     app.add_handler(CommandHandler("autopost", autopost_cmd))
     app.add_handler(CallbackQueryHandler(button_handler))
 
