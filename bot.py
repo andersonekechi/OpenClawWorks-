@@ -159,16 +159,12 @@ def _fmt_date(created_utc) -> str:
 def _main_menu_keyboard() -> InlineKeyboardMarkup:
     creds = get_x_credentials()
     ap_status = get_autopost_status(creds)
-    ap_label = "Auto-Post: ON ✅" if ap_status["enabled"] else "Auto-Post: OFF ⛔"
-    x_label = f"X Accounts: {ap_status['accounts_configured']} connected" if creds else "Connect X Account"
+    ap_icon = "✅ ON" if ap_status["enabled"] else "⛔ OFF"
+    accounts = ap_status["accounts_configured"]
+    x_label = f"⚙️ X Account & Auto-Post  [{ap_icon}]" if accounts else "⚙️ Connect X Account"
     return InlineKeyboardMarkup([
-        [InlineKeyboardButton("💰 Investors & Jobs", callback_data="cat_inv_0")],
-        [InlineKeyboardButton("🆘 Newbies Need Help", callback_data="cat_new_0")],
-        [InlineKeyboardButton("🐛 Devs Stuck on Problems", callback_data="cat_stk_0")],
-        [InlineKeyboardButton("🏗 Building & Collabs", callback_data="cat_bld_0")],
-        [InlineKeyboardButton("🧵 Articles (Long Threads)", callback_data="articles_0")],
-        [InlineKeyboardButton("🔄 Run Fresh Scan", callback_data="scan"), InlineKeyboardButton("📊 Stats", callback_data="stats")],
-        [InlineKeyboardButton(ap_label, callback_data="autopost_toggle")],
+        [InlineKeyboardButton("📊 Stats & Queue", callback_data="stats_queue")],
+        [InlineKeyboardButton("🔄 Run Fresh Scan", callback_data="scan")],
         [InlineKeyboardButton(x_label, callback_data="xsetup_menu")],
     ])
 
@@ -875,6 +871,60 @@ async def xsetup_cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
     return ConversationHandler.END
 
 
+async def _show_stats_queue(target):
+    store = _get_store()
+    s = store.get_stats()
+    creds = get_x_credentials()
+    ap = get_autopost_status(creds)
+
+    unposted = s.get("unposted", 0)
+    posted = s.get("posted", 0)
+    arts_total = s.get("articles_total", 0)
+    arts_posted = s.get("articles_posted", 0)
+    arts_left = arts_total - arts_posted
+    max_pd = max(ap["max_posts_per_day"], 1)
+    days_left = unposted // max_pd
+
+    ap_icon = "\u2705 ON" if ap["enabled"] else "\u26d4 OFF"
+
+    lines = [
+        "<b>Stats & Queue</b>\n",
+        f"<b>Auto-posting:</b> {ap_icon}",
+        f"<b>Posted today:</b> {ap['posted_today']}/{ap['max_posts_per_day']}",
+        f"<b>Remaining today:</b> {ap['remaining_today']}",
+        "",
+        "<b>Content Queue</b>",
+        f"  Tweets ready:   <b>{unposted}</b>",
+        f"  Threads ready:  <b>{arts_left}</b>",
+        f"  Already posted: <b>{posted}</b>",
+        f"  Queue covers:   <b>~{days_left} days</b>",
+        "",
+        "<b>By Category (unposted)</b>",
+    ]
+    cat_labels = {
+        "investor":    "\U0001f4b0 Investors & Jobs",
+        "newbie_help": "\U0001f198 Newbies",
+        "stuck_dev":   "\U0001f41b Devs Stuck",
+        "building":    "\U0001f3d7 Building",
+    }
+    by_cat = s.get("by_category", {})
+    for key, label in cat_labels.items():
+        lines.append(f"  {label}: <b>{by_cat.get(key, 0)}</b>")
+
+    next_posts = store.get_latest_posts(limit=1, exclude_posted=True)
+    if next_posts:
+        p = next_posts[0]
+        lines.append("")
+        lines.append(f"<b>Next up:</b> {p['title'][:60]}...")
+
+    text = "\n".join(lines)
+    kb = InlineKeyboardMarkup([[InlineKeyboardButton("< Menu", callback_data="menu")]])
+    if hasattr(target, "edit_message_text"):
+        await target.edit_message_text(text, parse_mode="HTML", reply_markup=kb)
+    else:
+        await target.message.reply_text(text, parse_mode="HTML", reply_markup=kb)
+
+
 async def _show_x_account_panel(target):
     """Show X account status dashboard with live stats."""
     creds_list = get_x_credentials()
@@ -948,6 +998,10 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     data = query.data
 
     if data == "noop":
+        return
+
+    if data == "stats_queue":
+        await _show_stats_queue(query)
         return
 
     # Auto-Post toggle button from menu
@@ -1172,7 +1226,7 @@ async def send_startup_message(app: Application):
             text += f"X: <b>{len(creds_list)} account(s)</b> | Auto-post: <b>{'ON' if ap_status['enabled'] else 'OFF'}</b>\n\n"
         else:
             text += "Tap <b>Connect X Account</b> to set up auto-posting.\n\n"
-        text += "Pick a category:"
+        text += "Use the buttons below:"
 
         await app.bot.send_message(
             chat_id=chat_id, text=text, parse_mode="HTML",
