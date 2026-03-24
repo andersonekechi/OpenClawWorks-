@@ -938,16 +938,11 @@ async def _show_x_account_panel(target):
         lines.append("❌ No X accounts connected yet.\n")
     else:
         for c in creds_list:
-            from x_poster import verify_credentials
-            result = await asyncio.to_thread(verify_credentials, c)
-            if result.get("success"):
-                username = result.get("username", "?")
-                posted = next((a["posted_today"] for a in state.get("accounts", []) if a["label"] == c.label), 0)
-                remaining = 17 - posted
-                lines.append(f"✅ <b>@{username}</b> ({c.label})")
-                lines.append(f"   Posted today: <b>{posted}/17</b> | Remaining: <b>{remaining}</b>")
-            else:
-                lines.append(f"⚠️ {c.label} — <i>connection issue</i>")
+            acct_state = next((a for a in state.get("accounts", []) if a["label"] == c.label), {})
+            posted = acct_state.get("posted_today", 0)
+            remaining = acct_state.get("remaining_today", 17)
+            lines.append(f"✅ <b>{c.label}</b> — keys configured")
+            lines.append(f"   Posted today: <b>{posted}/17</b> | Remaining: <b>{remaining}</b>")
         lines.append("")
 
     # Auto-post status

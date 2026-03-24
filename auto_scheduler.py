@@ -54,6 +54,15 @@ def set_auto_posting(enabled: bool, chat_id: str = "") -> None:
     if chat_id:
         _notify_chat_id = chat_id
     logger.info(f"Auto-posting {'ENABLED' if enabled else 'DISABLED'}")
+    # Persist state so the panel can read the true value
+    try:
+        state = _load_state()
+        state["auto_posting_enabled"] = enabled
+        if chat_id:
+            state["notify_chat_id"] = chat_id
+        _save_state(state)
+    except Exception:
+        pass
 
 
 def is_auto_posting_enabled() -> bool:
@@ -141,7 +150,13 @@ def _prepare_thread_tweets(tweets: list[str]) -> list[str]:
 
 async def run_auto_poster(bot=None) -> None:
     """Main loop: posts to X on interval when enabled."""
+    global _notify_chat_id
     logger.info(f"Auto-poster loop started. Interval: {POST_INTERVAL_SECONDS}s (~{POST_INTERVAL_SECONDS//60}min)")
+
+    # Restore notify_chat_id from persisted state
+    state = _load_state()
+    if state.get("notify_chat_id"):
+        _notify_chat_id = state["notify_chat_id"]
 
     creds_list = get_all_credentials()
     if not creds_list:
@@ -320,11 +335,13 @@ def get_status(creds_list=None) -> dict:
         creds_list = get_all_credentials()
 
     state = _load_state()
+    # Read persisted enabled flag (accurate even when called from outside the bot process)
+    enabled = state.get("auto_posting_enabled", _auto_posting_enabled)
     total_today = sum(_account_posts_today(state, c.label) for c in creds_list)
     max_per_day = len(creds_list) * POSTS_PER_ACCOUNT_PER_DAY
 
     return {
-        "enabled": _auto_posting_enabled,
+        "enabled": enabled,
         "accounts_configured": len(creds_list),
         "max_posts_per_day": max_per_day,
         "posted_today": total_today,
