@@ -1172,6 +1172,11 @@ def main():
     )
     async def post_init(app):
         await send_startup_message(app)
+        # Auto-enable posting on startup if chat_id is configured
+        chat_id = os.getenv("TELEGRAM_CHAT_ID", "")
+        if chat_id:
+            set_auto_posting(True, chat_id)
+            logger.info("Auto-posting enabled on startup for chat %s", chat_id)
         asyncio.ensure_future(run_auto_poster(app.bot))
 
     app.post_init = post_init

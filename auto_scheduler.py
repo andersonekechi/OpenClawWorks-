@@ -226,8 +226,34 @@ async def _post_single(store, creds, state, creds_list, bot):
 
         elif result.get("error") == "rate_limited":
             logger.warning(f"Rate limited on {creds.label}")
+            if bot and _notify_chat_id:
+                await bot.send_message(
+                    chat_id=_notify_chat_id,
+                    text="⏳ Rate limited on X — waiting for reset. Will retry next interval.",
+                    parse_mode="HTML",
+                )
+        elif result.get("error", "").startswith("http_503") or result.get("error", "").startswith("http_502"):
+            logger.warning(f"X API down (503) on {creds.label}")
+            if bot and _notify_chat_id:
+                await bot.send_message(
+                    chat_id=_notify_chat_id,
+                    text=(
+                        "⚠️ <b>X API is down (503)</b> — tried to post but X servers are degraded.\n\n"
+                        f"Post queued: <b>{post['title'][:60]}</b>\n\n"
+                        "Will retry automatically next interval (~43 min). "
+                        "Check: api.status.x.com"
+                    ),
+                    parse_mode="HTML",
+                    disable_web_page_preview=True,
+                )
         else:
             logger.error(f"Post failed: {result}")
+            if bot and _notify_chat_id:
+                await bot.send_message(
+                    chat_id=_notify_chat_id,
+                    text=f"❌ Post failed: <code>{result.get('error','unknown')}</code>",
+                    parse_mode="HTML",
+                )
 
     except Exception as e:
         logger.error(f"_post_single error: {e}", exc_info=True)
@@ -278,6 +304,14 @@ async def _post_article(store, creds, state, creds_list, bot):
 
     except Exception as e:
         logger.error(f"_post_article error: {e}", exc_info=True)
+        if bot and _notify_chat_id:
+            err_str = str(e)
+            if '503' in err_str or '502' in err_str:
+                await bot.send_message(
+                    chat_id=_notify_chat_id,
+                    text="⚠️ <b>X API is down (503)</b> — thread post failed. Will retry next interval.",
+                    parse_mode="HTML",
+                )
 
 
 def get_status(creds_list=None) -> dict:
