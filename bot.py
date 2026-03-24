@@ -875,6 +875,68 @@ async def xsetup_cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
     return ConversationHandler.END
 
 
+async def _show_x_account_panel(target):
+    """Show X account status dashboard with live stats."""
+    creds_list = get_x_credentials()
+    state = __import__("auto_scheduler").get_status(creds_list)
+    store = _get_store()
+    db_stats = store.get_stats()
+
+    lines = ["<b>X Account Dashboard</b>\n"]
+
+    if not creds_list:
+        lines.append("❌ No X accounts connected yet.\n")
+    else:
+        for c in creds_list:
+            from x_poster import verify_credentials
+            result = await asyncio.to_thread(verify_credentials, c)
+            if result.get("success"):
+                username = result.get("username", "?")
+                posted = next((a["posted_today"] for a in state.get("accounts", []) if a["label"] == c.label), 0)
+                remaining = 17 - posted
+                lines.append(f"✅ <b>@{username}</b> ({c.label})")
+                lines.append(f"   Posted today: <b>{posted}/17</b> | Remaining: <b>{remaining}</b>")
+            else:
+                lines.append(f"⚠️ {c.label} — <i>connection issue</i>")
+        lines.append("")
+
+    # Auto-post status
+    ap_icon = "✅ ON" if state["enabled"] else "⛔ OFF"
+    lines.append(f"Auto-posting: <b>{ap_icon}</b>")
+    lines.append(f"Posts today: <b>{state['posted_today']}/{state['max_posts_per_day']}</b>")
+    lines.append(f"Remaining today: <b>{state['remaining_today']}</b>")
+    lines.append(f"Interval: every <b>~{state['interval_minutes']} min</b>")
+    lines.append("")
+
+    # DB content remaining
+    unposted = db_stats.get("unposted", 0)
+    total = db_stats.get("total_posts", 0)
+    articles = db_stats.get("articles_total", 0)
+    unposted_arts = articles - db_stats.get("articles_posted", 0)
+    lines.append(f"Posts in queue: <b>{unposted}</b> tweets ready")
+    lines.append(f"Article threads: <b>{unposted_arts}</b> threads ready")
+    if state["max_posts_per_day"] > 0:
+        days_left = unposted // max(state["max_posts_per_day"], 1)
+        lines.append(f"Content covers: <b>~{days_left} days</b> at current rate")
+
+    # Buttons
+    buttons = []
+    ap_toggle_label = "⛔ Turn Auto-Post OFF" if state["enabled"] else "✅ Turn Auto-Post ON"
+    buttons.append([InlineKeyboardButton(ap_toggle_label, callback_data="autopost_toggle")])
+    buttons.append([InlineKeyboardButton("➕ Add Another X Account", callback_data="xsetup_start_wizard")])
+    if creds_list:
+        for c in creds_list:
+            buttons.append([InlineKeyboardButton(f"🔄 Re-verify {c.label}", callback_data=f"xverify_{c.label.split('_')[1]}")])
+    buttons.append([InlineKeyboardButton("< Menu", callback_data="menu")])
+
+    text = "\n".join(lines)
+    kb = InlineKeyboardMarkup(buttons)
+    if hasattr(target, "edit_message_text"):
+        await target.edit_message_text(text, parse_mode="HTML", reply_markup=kb, disable_web_page_preview=True)
+    else:
+        await target.message.reply_text(text, parse_mode="HTML", reply_markup=kb, disable_web_page_preview=True)
+
+
 async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not _is_admin(update):
         return await _deny(update)
@@ -918,21 +980,16 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("< Menu", callback_data="menu")]]))
         return
 
-    # X Setup menu
+    # X Setup menu — show connected account info + options
     if data == "xsetup_menu":
-        await query.edit_message_text(
-            "Tap <b>Connect X Account</b> below, or send /xsetup to start the guided setup wizard.\n\n"
-            "The wizard walks you through pasting each key one at a time — no SSH needed.",
-            parse_mode="HTML",
-            reply_markup=InlineKeyboardMarkup([
-                [InlineKeyboardButton("🔑 Start Key Setup Wizard", callback_data="xsetup_start_wizard")],
-                [InlineKeyboardButton("< Menu", callback_data="menu")],
-            ])
-        )
+        await _show_x_account_panel(query)
         return
 
     if data == "xsetup_start_wizard":
-        await query.message.reply_text("Starting wizard — send /xsetup")
+        await query.message.reply_text(
+            "Starting X account setup wizard...\n\nSend /xsetup to begin.",
+            parse_mode="HTML",
+        )
         return
 
     # X Setup: verify account 1 or 2
