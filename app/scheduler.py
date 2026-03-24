@@ -65,6 +65,7 @@ def load_state(state_file: Path) -> dict:
 
 
 def save_state(state_file: Path, state: dict) -> None:
+    state_file.parent.mkdir(parents=True, exist_ok=True)
     state_file.write_text(json.dumps(state, indent=2), encoding="utf-8")
 
 
@@ -143,6 +144,13 @@ def run_scheduler(settings: Settings) -> None:
 
     signal.signal(signal.SIGINT, handle_signal)
     signal.signal(signal.SIGTERM, handle_signal)
+
+    if settings.run_once_on_start:
+        LOGGER.info("Running one immediate startup post attempt.")
+        run_post_job(context)
+        if settings.exit_after_run_once:
+            LOGGER.info("Exiting because ASSISTANT_EXIT_AFTER_RUN_ONCE=true.")
+            return
 
     LOGGER.info("Starting scheduler in %s mode.", settings.post_mode)
     scheduler.start()
