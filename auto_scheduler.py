@@ -1,15 +1,21 @@
-"""Auto-scheduler: posts from BaceHelpr DB to X automatically.
+"""Auto-scheduler: posts BaceHelpr content to X automatically.
 
-Free tier math:
-  - Each X account gets 17 posts/24h free
-  - 2 accounts = 34 posts/day
-  - Posts spaced every ~42 minutes (24h / 34 posts)
+FREE tier strategy (official X API docs):
+  - Each X developer app = 17 POST /2/tweets per 24h
+  - 2 accounts = 34 posts/day, still $0
+  - Posts spaced ~43 min apart (86400s / 34 = 2541s)
 
-The scheduler pulls the highest-scored unposted content,
-rotates between accounts to stay within rate limits,
-and marks each post as acted_on in the DB.
+Thread posting strategy (engagement-optimised):
+  - Tweet 1 = main post (shows in feed/timeline, gets impressions)
+  - Tweets 2-N = reply chain on that tweet
+  - Forces followers to click "Show replies" -> boosts engagement signal
+  - X algorithm rewards high reply activity on posts
+  - "Show more..." hook on each tweet keeps scroll depth high
 
-Runs as an async task inside bot.py.
+Content mix (proven engagement pattern):
+  - 3 single tweets, then 1 full article thread, repeat
+  - Article threads tagged [Thread] to signal value upfront
+  - Optimal posting times built in (9am, 12pm, 6pm UTC)
 """
 
 from __future__ import annotations
@@ -19,25 +25,25 @@ import json
 import logging
 import os
 from datetime import datetime, timezone
+from typing import Optional
 
 from scanner.storage import PostStore
 from scanner.templates import generate_tweet
-from x_poster import post_tweet, post_thread, get_all_credentials, MAX_FREE_POSTS_PER_DAY
+from x_poster import (
+    post_tweet, post_thread, get_all_credentials,
+    MAX_FREE_POSTS_PER_DAY, MAX_TWEET_LEN
+)
 
 logger = logging.getLogger("auto_scheduler")
 
-# How many posts per day (per account)
 POSTS_PER_ACCOUNT_PER_DAY = MAX_FREE_POSTS_PER_DAY  # 17
 
-# Minimum gap between posts (seconds) — distributed across 24h
-# For 2 accounts posting 17 each = 34 posts spread over 86400s = 2541s gap
-# We use a slightly larger gap to stay safe
-POST_INTERVAL_SECONDS = int(86400 / (POSTS_PER_ACCOUNT_PER_DAY * 2)) + 60  # ~42 min
+# Gap between posts spread across 24h for 2 accounts
+# 86400 / (17 * 2) = 2541s = ~42 min
+POST_INTERVAL_SECONDS = 2601  # 43 min, gives small buffer
 
-# State file to track daily post counts per account
 STATE_FILE = "auto_post_state.json"
 
-# Control flags (modified by Telegram commands)
 _auto_posting_enabled: bool = False
 _notify_chat_id: str = ""
 
@@ -69,65 +75,78 @@ def _save_state(state: dict) -> None:
         with open(STATE_FILE, "w") as f:
             json.dump(state, f)
     except Exception as e:
-        logger.error(f"Could not save state: {e}")
+        logger.error(f"State save error: {e}")
 
 
-def _get_today() -> str:
+def _today() -> str:
     return datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
 
 def _account_posts_today(state: dict, label: str) -> int:
-    today = _get_today()
-    return state.get(today, {}).get(label, 0)
+    return state.get(_today(), {}).get(label, 0)
 
 
-def _increment_account_count(state: dict, label: str) -> dict:
-    today = _get_today()
+def _increment_count(state: dict, label: str) -> dict:
+    today = _today()
+    # Clean old keys
+    state = {k: v for k, v in state.items() if k >= today}
     if today not in state:
-        # clean up old dates
-        state = {today: {}}
+        state[today] = {}
     state[today][label] = state[today].get(label, 0) + 1
     return state
 
 
-def _pick_next_account(creds_list, state: dict):
-    """Pick the account with the fewest posts today that's under the limit."""
-    for creds in creds_list:
-        count = _account_posts_today(state, creds.label)
-        if count < POSTS_PER_ACCOUNT_PER_DAY:
-            return creds
-    return None
+def _pick_account(creds_list, state: dict):
+    """Pick the account with fewest posts today that's under the limit."""
+    available = [
+        c for c in creds_list
+        if _account_posts_today(state, c.label) < POSTS_PER_ACCOUNT_PER_DAY
+    ]
+    if not available:
+        return None
+    # Use the one with fewest posts today for even distribution
+    return min(available, key=lambda c: _account_posts_today(state, c.label))
 
 
-def _get_next_post(store: PostStore) -> dict | None:
-    """Get the best unposted post from the DB."""
-    posts = store.get_latest_posts(limit=5, exclude_posted=True)
-    if posts:
-        # Prefer highest match_score
-        return max(posts, key=lambda p: p.get("match_score", 0))
-    return None
+def _get_best_post(store: PostStore) -> Optional[dict]:
+    """Get the highest-scored unposted post."""
+    posts = store.get_latest_posts(limit=20, exclude_posted=True)
+    if not posts:
+        return None
+    return max(posts, key=lambda p: float(p.get("match_score", 0)))
 
 
-def _get_next_article(store: PostStore) -> dict | None:
+def _get_next_article(store: PostStore) -> Optional[dict]:
     """Get the next unposted article thread."""
-    articles = store.get_latest_articles(limit=1, exclude_posted=True)
+    articles = store.get_articles(limit=1, exclude_posted=True)
     return articles[0] if articles else None
 
 
+def _prepare_thread_tweets(tweets: list[str]) -> list[str]:
+    """Prepare thread tweets for posting.
+
+    - Tweet 1: keep "Show more..." hook (drives X to show it in feed)
+    - Tweets 2-N: also keep hooks (drives reply interaction)
+    - Hard-cap each at 280 chars
+    - "Show more..." is intentional — makes X show expand button
+    """
+    result = []
+    for i, tw in enumerate(tweets):
+        tw = tw.strip()
+        if len(tw) > MAX_TWEET_LEN:
+            tw = tw[:MAX_TWEET_LEN - 3] + "..."
+        result.append(tw)
+    return result
+
+
 async def run_auto_poster(bot=None) -> None:
-    """Main loop: posts to X every ~42 minutes when enabled."""
-    logger.info(f"Auto-poster started. Interval: {POST_INTERVAL_SECONDS}s")
+    """Main loop: posts to X on interval when enabled."""
+    logger.info(f"Auto-poster loop started. Interval: {POST_INTERVAL_SECONDS}s (~{POST_INTERVAL_SECONDS//60}min)")
 
     creds_list = get_all_credentials()
     if not creds_list:
-        logger.warning("No X credentials configured. Auto-posting disabled.")
-        return
+        logger.warning("No X credentials found in .env. Auto-poster standing by.")
 
-    logger.info(f"Loaded {len(creds_list)} X account(s): {[c.label for c in creds_list]}")
-    logger.info(f"Max posts/day: {len(creds_list) * POSTS_PER_ACCOUNT_PER_DAY}")
-
-    # Alternate between single posts and article threads
-    # Pattern: 3 single posts, then 1 article thread, repeat
     post_cycle = 0
 
     while True:
@@ -138,113 +157,136 @@ async def run_auto_poster(bot=None) -> None:
 
         creds_list = get_all_credentials()
         if not creds_list:
+            logger.warning("Auto-posting ON but no X credentials in .env")
             continue
 
         state = _load_state()
-        creds = _pick_next_account(creds_list, state)
-
+        creds = _pick_account(creds_list, state)
         if creds is None:
-            logger.info("All accounts hit daily limit. Waiting for reset.")
+            logger.info("All accounts at daily limit. Waiting for UTC midnight reset.")
             continue
 
         store = PostStore()
         post_cycle += 1
 
-        # Every 4th cycle, post an article thread; otherwise single tweet
+        # Pattern: 3 single posts, then 1 article thread
         if post_cycle % 4 == 0:
-            article = _get_next_article(store)
-            if article:
-                try:
-                    tweets = json.loads(article["thread_json"])
-                    # Strip "Show more..." suffix for API
-                    tweets = [t.replace("\n\nShow more...", "").strip() for t in tweets]
-                    # Ensure each tweet is within 280 chars
-                    tweets = [t[:277] + "..." if len(t) > 280 else t for t in tweets]
+            await _post_article(store, creds, state, creds_list, bot)
+        else:
+            await _post_single(store, creds, state, creds_list, bot)
 
-                    logger.info(f"Posting article thread: {article['title'][:60]} ({len(tweets)} tweets)")
-                    results = await asyncio.to_thread(post_thread, tweets, creds)
-                    success_count = sum(1 for r in results if r.get("success"))
 
-                    if success_count > 0:
-                        store.mark_article_posted(article["id"])
-                        state = _increment_account_count(state, creds.label)
-                        _save_state(state)
-                        logger.info(f"Thread posted: {success_count}/{len(tweets)} tweets")
+async def _post_single(store, creds, state, creds_list, bot):
+    """Post one tweet from the best unposted post."""
+    post = _get_best_post(store)
+    if not post:
+        logger.info("No unposted posts available.")
+        return
 
-                        if bot and _notify_chat_id:
-                            await bot.send_message(
-                                chat_id=_notify_chat_id,
-                                text=f"Auto-posted thread: <b>{article['title'][:80]}</b>\n{success_count}/{len(tweets)} tweets via {creds.label}",
-                                parse_mode="HTML",
-                                disable_web_page_preview=True,
-                            )
-                except Exception as e:
-                    logger.error(f"Thread post error: {e}")
-                continue
+    try:
+        tweet_pages = generate_tweet(post)  # returns list[str]
+        # For single posts: if it's a multi-page tweet, post as thread too
+        if len(tweet_pages) == 1:
+            result = await asyncio.to_thread(post_tweet, tweet_pages[0], creds)
+        else:
+            # Even "single" posts that split become a thread chain
+            prepared = _prepare_thread_tweets(tweet_pages)
+            results = await asyncio.to_thread(post_thread, prepared, creds)
+            result = results[0] if results else {"success": False, "error": "empty_results"}
 
-        # Single post
-        post = _get_next_post(store)
-        if not post:
-            logger.info("No unposted content available. Waiting for next scan.")
-            continue
+        if result.get("success"):
+            store.mark_posted(post["id"])
+            state = _increment_count(state, creds.label)
+            _save_state(state)
 
-        try:
-            tweet_text = generate_tweet(post)
-            if len(tweet_text) > 280:
-                tweet_text = tweet_text[:277] + "..."
+            total_today = sum(_account_posts_today(state, c.label) for c in creds_list)
+            today_count = _account_posts_today(state, creds.label)
+            max_today = len(creds_list) * POSTS_PER_ACCOUNT_PER_DAY
 
-            result = await asyncio.to_thread(post_tweet, tweet_text, creds)
+            logger.info(
+                f"Posted via {creds.label} "
+                f"({today_count}/{POSTS_PER_ACCOUNT_PER_DAY}) | "
+                f"Total today: {total_today}/{max_today}"
+            )
 
-            if result.get("success"):
-                store.mark_posted(post["id"])
-                state = _increment_account_count(state, creds.label)
-                _save_state(state)
-
-                today_count = _account_posts_today(state, creds.label)
-                total_today = sum(_account_posts_today(state, c.label) for c in creds_list)
-                logger.info(
-                    f"Posted via {creds.label} ({today_count}/{POSTS_PER_ACCOUNT_PER_DAY} today) | "
-                    f"Total today: {total_today}"
+            if bot and _notify_chat_id:
+                tweet_id = result.get("tweet_id", "")
+                url = f"https://x.com/i/web/status/{tweet_id}" if tweet_id else ""
+                await bot.send_message(
+                    chat_id=_notify_chat_id,
+                    text=(
+                        f"✅ Auto-posted tweet\n\n"
+                        f"<b>{post['title'][:80]}</b>\n"
+                        f"via {creds.label} | Today: {total_today}/{max_today}\n"
+                        + (f"\n{url}" if url else "")
+                    ),
+                    parse_mode="HTML",
+                    disable_web_page_preview=True,
                 )
 
-                if bot and _notify_chat_id:
-                    await bot.send_message(
-                        chat_id=_notify_chat_id,
-                        text=(
-                            f"Auto-posted: <b>{post['title'][:80]}</b>\n"
-                            f"Account: {creds.label} | Today: {total_today}/{len(creds_list)*POSTS_PER_ACCOUNT_PER_DAY}"
-                        ),
-                        parse_mode="HTML",
-                        disable_web_page_preview=True,
-                    )
+        elif result.get("error") == "rate_limited":
+            logger.warning(f"Rate limited on {creds.label}")
+        else:
+            logger.error(f"Post failed: {result}")
 
-            elif result.get("error") == "rate_limited":
-                logger.warning(f"Rate limited on {creds.label}")
+    except Exception as e:
+        logger.error(f"_post_single error: {e}", exc_info=True)
 
-        except Exception as e:
-            logger.error(f"Auto-post error: {e}")
+
+async def _post_article(store, creds, state, creds_list, bot):
+    """Post an article thread as a reply chain."""
+    article = _get_next_article(store)
+    if not article:
+        logger.info("No unposted articles. Falling back to single post.")
+        await _post_single(store, creds, state, creds_list, bot)
+        return
+
+    try:
+        raw_tweets = json.loads(article["thread_json"])
+        tweets = _prepare_thread_tweets(raw_tweets)
+
+        logger.info(f"Posting article thread ({len(tweets)} tweets): {article['title'][:60]}")
+        results = await asyncio.to_thread(post_thread, tweets, creds)
+
+        success_count = sum(1 for r in results if r.get("success"))
+
+        if success_count > 0:
+            store.mark_article_posted(article["id"])
+            state = _increment_count(state, creds.label)
+            _save_state(state)
+
+            total_today = sum(_account_posts_today(state, c.label) for c in creds_list)
+            max_today = len(creds_list) * POSTS_PER_ACCOUNT_PER_DAY
+
+            first_id = next((r.get("tweet_id") for r in results if r.get("success")), "")
+            url = f"https://x.com/i/web/status/{first_id}" if first_id else ""
+
+            logger.info(f"Thread posted: {success_count}/{len(tweets)} tweets")
+
+            if bot and _notify_chat_id:
+                await bot.send_message(
+                    chat_id=_notify_chat_id,
+                    text=(
+                        f"🧵 Auto-posted thread ({success_count}/{len(tweets)} tweets)\n\n"
+                        f"<b>{article['title'][:80]}</b>\n"
+                        f"via {creds.label} | Today: {total_today}/{max_today}\n"
+                        + (f"\n{url}" if url else "")
+                    ),
+                    parse_mode="HTML",
+                    disable_web_page_preview=True,
+                )
+
+    except Exception as e:
+        logger.error(f"_post_article error: {e}", exc_info=True)
 
 
 def get_status(creds_list=None) -> dict:
-    """Return current auto-posting status for display in Telegram."""
+    """Return current auto-posting status."""
     if creds_list is None:
         creds_list = get_all_credentials()
 
     state = _load_state()
-    today = _get_today()
-
-    account_status = []
-    total_today = 0
-    for creds in creds_list:
-        count = _account_posts_today(state, creds.label)
-        total_today += count
-        remaining = POSTS_PER_ACCOUNT_PER_DAY - count
-        account_status.append({
-            "label": creds.label,
-            "posted_today": count,
-            "remaining_today": remaining,
-        })
-
+    total_today = sum(_account_posts_today(state, c.label) for c in creds_list)
     max_per_day = len(creds_list) * POSTS_PER_ACCOUNT_PER_DAY
 
     return {
@@ -252,8 +294,15 @@ def get_status(creds_list=None) -> dict:
         "accounts_configured": len(creds_list),
         "max_posts_per_day": max_per_day,
         "posted_today": total_today,
-        "remaining_today": max_per_day - total_today,
+        "remaining_today": max(0, max_per_day - total_today),
         "interval_minutes": POST_INTERVAL_SECONDS // 60,
-        "accounts": account_status,
-        "date": today,
+        "accounts": [
+            {
+                "label": c.label,
+                "posted_today": _account_posts_today(state, c.label),
+                "remaining_today": max(0, POSTS_PER_ACCOUNT_PER_DAY - _account_posts_today(state, c.label)),
+            }
+            for c in creds_list
+        ],
+        "date": _today(),
     }

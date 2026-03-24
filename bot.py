@@ -26,7 +26,8 @@ from scanner.reddit_client import RedditClient
 from scanner.scanner import RedditScanner
 from scanner.storage import PostStore
 from scanner.articles import generate_articles
-from auto_scheduler import run_auto_poster, set_auto_posting, is_auto_posting_enabled, get_status as get_autopost_status, get_all_credentials as get_x_credentials
+from auto_scheduler import run_auto_poster, set_auto_posting, is_auto_posting_enabled, get_status as get_autopost_status
+from x_poster import get_all_credentials as get_x_credentials, verify_credentials, load_credentials
 
 from scanner.templates import generate_tweet
 
@@ -100,14 +101,19 @@ def _fmt_date(created_utc) -> str:
 
 
 def _main_menu_keyboard() -> InlineKeyboardMarkup:
+    creds = get_x_credentials()
+    ap_status = get_autopost_status(creds)
+    ap_label = "Auto-Post: ON ✅" if ap_status["enabled"] else "Auto-Post: OFF ⛔"
+    x_label = f"X Accounts: {ap_status['accounts_configured']} connected" if creds else "Connect X Account"
     return InlineKeyboardMarkup([
-        [InlineKeyboardButton("$ Investors & Jobs", callback_data="cat_inv_0")],
-        [InlineKeyboardButton("? Newbies Need Help", callback_data="cat_new_0")],
-        [InlineKeyboardButton("! Devs Stuck on Problems", callback_data="cat_stk_0")],
-        [InlineKeyboardButton("> Building & Collabs", callback_data="cat_bld_0")],
-        [InlineKeyboardButton("Articles (Long Threads)", callback_data="articles_0")],
-        [InlineKeyboardButton("Run Fresh Scan", callback_data="scan")],
-        [InlineKeyboardButton("Stats", callback_data="stats")],
+        [InlineKeyboardButton("💰 Investors & Jobs", callback_data="cat_inv_0")],
+        [InlineKeyboardButton("🆘 Newbies Need Help", callback_data="cat_new_0")],
+        [InlineKeyboardButton("🐛 Devs Stuck on Problems", callback_data="cat_stk_0")],
+        [InlineKeyboardButton("🏗 Building & Collabs", callback_data="cat_bld_0")],
+        [InlineKeyboardButton("🧵 Articles (Long Threads)", callback_data="articles_0")],
+        [InlineKeyboardButton("🔄 Run Fresh Scan", callback_data="scan"), InlineKeyboardButton("📊 Stats", callback_data="stats")],
+        [InlineKeyboardButton(ap_label, callback_data="autopost_toggle")],
+        [InlineKeyboardButton(x_label, callback_data="xsetup_menu")],
     ])
 
 
@@ -578,6 +584,50 @@ async def autopost_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("\n".join(lines), parse_mode="HTML")
 
 
+async def _show_xsetup_menu(target):
+    """Show X API setup guide and account status."""
+    creds_list = get_x_credentials()
+    lines = ["<b>X Account Setup</b>\n"]
+
+    if not creds_list:
+        lines.append("No X accounts connected yet.\n")
+    else:
+        for c in creds_list:
+            lines.append(f"• {c.label} — tap to verify")
+        lines.append("")
+
+    lines.append(
+        "<b>How to add an account:</b>\n"
+        "1. Go to developer.x.com\n"
+        "2. Sign in with your X account\n"
+        "3. Create project + app\n"
+        "4. Set permissions to Read & Write\n"
+        "5. Generate Access Token & Secret\n"
+        "6. SSH into VPS:\n"
+        "   <code>ssh root@217.156.64.90</code>\n"
+        "7. Edit: <code>nano /opt/bacehelpr/.env</code>\n"
+        "8. Paste the 4 keys (X_API_KEY_1= etc)\n"
+        "9. Restart: <code>systemctl restart bacehelpr</code>\n"
+        "10. Come back here → Verify Account\n\n"
+        "<b>Free tier = 17 posts/day per account</b>\n"
+        "2 accounts = 34/day free"
+    )
+
+    buttons = []
+    for i in range(1, 4):
+        c = load_credentials(str(i))
+        if c.is_configured:
+            buttons.append([InlineKeyboardButton(f"✅ Verify Account {i}", callback_data=f"xverify_{i}")])
+    buttons.append([InlineKeyboardButton("< Menu", callback_data="menu")])
+
+    text = "\n".join(lines)
+    kb = InlineKeyboardMarkup(buttons)
+    if hasattr(target, "edit_message_text"):
+        await target.edit_message_text(text, parse_mode="HTML", reply_markup=kb, disable_web_page_preview=True)
+    else:
+        await target.message.reply_text(text, parse_mode="HTML", reply_markup=kb, disable_web_page_preview=True)
+
+
 async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not _is_admin(update):
         return await _deny(update)
@@ -589,6 +639,65 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     data = query.data
 
     if data == "noop":
+        return
+
+    # Auto-Post toggle button from menu
+    if data == "autopost_toggle":
+        creds = get_x_credentials()
+        ap_status = get_autopost_status(creds)
+        if not creds:
+            await query.edit_message_text(
+                "<b>No X account connected yet.</b>\n\n"
+                "Tap <b>Connect X Account</b> in the menu to set up your API keys.",
+                parse_mode="HTML",
+                reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("< Menu", callback_data="menu")]]),
+            )
+            return
+        if ap_status["enabled"]:
+            set_auto_posting(False)
+            msg = "⛔ <b>Auto-posting OFF</b>\n\nPosts have been paused."
+        else:
+            chat_id = str(query.message.chat_id)
+            set_auto_posting(True, chat_id)
+            s = get_autopost_status(creds)
+            msg = (
+                "✅ <b>Auto-posting ON</b>\n\n"
+                f"Accounts: <b>{s['accounts_configured']}</b>\n"
+                f"Max posts/day: <b>{s['max_posts_per_day']}</b>\n"
+                f"Posting every: <b>~{s['interval_minutes']} min</b>\n\n"
+                "You'll get a notification here after each post."
+            )
+        await query.edit_message_text(msg, parse_mode="HTML",
+            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("< Menu", callback_data="menu")]]))
+        return
+
+    # X Setup menu
+    if data == "xsetup_menu":
+        await _show_xsetup_menu(query)
+        return
+
+    # X Setup: verify account 1 or 2
+    if data.startswith("xverify_"):
+        suffix = data.split("_")[1]
+        creds = load_credentials(suffix)
+        result = await asyncio.to_thread(verify_credentials, creds)
+        if result.get("success"):
+            await query.edit_message_text(
+                f"✅ <b>Account {suffix} connected!</b>\n\n"
+                f"Username: @{result['username']}\n\n"
+                "Great — this account can post 17 tweets/day free.",
+                parse_mode="HTML",
+                reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("< X Setup", callback_data="xsetup_menu")]])
+            )
+        else:
+            err = result.get("error", "unknown")
+            await query.edit_message_text(
+                f"❌ <b>Account {suffix} failed</b>\n\n"
+                f"Error: <code>{err}</code>\n\n"
+                "Check that all 4 keys are correct in .env and restart the bot.",
+                parse_mode="HTML",
+                reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("< X Setup", callback_data="xsetup_menu")]])
+            )
         return
 
     if data == "menu":
@@ -741,9 +850,12 @@ async def send_startup_message(app: Application):
         else:
             text += "\n\nHit <b>Run Fresh Scan</b> to get started.\n\n"
 
-        creds_count = len(get_x_credentials())
-        if creds_count:
-            text += f"X auto-posting: <b>{creds_count} account(s)</b> configured. Use /autopost on\n\n"
+        creds_list = get_x_credentials()
+        ap_status = get_autopost_status(creds_list)
+        if creds_list:
+            text += f"X: <b>{len(creds_list)} account(s)</b> | Auto-post: <b>{'ON' if ap_status['enabled'] else 'OFF'}</b>\n\n"
+        else:
+            text += "Tap <b>Connect X Account</b> to set up auto-posting.\n\n"
         text += "Pick a category:"
 
         await app.bot.send_message(
