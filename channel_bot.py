@@ -76,6 +76,56 @@ def _del_pending(context: ContextTypes.DEFAULT_TYPE, pending_id: str) -> None:
     context.bot_data.get("pending", {}).pop(pending_id, None)
 
 
+async def _send_to_owner(bot, msg: dict, caption_header: str, pending_id: str) -> None:
+    """Send the actual media (or text) to the owner with Approve/Edit/Reject buttons."""
+    kb = _approval_keyboard(pending_id)
+
+    if msg["type"] == "text":
+        preview = msg.get("text", "")[:300]
+        await bot.send_message(
+            chat_id=OWNER_ID,
+            text=f"{caption_header}\n\n{preview}",
+            reply_markup=kb,
+        )
+
+    elif msg["type"] == "photo":
+        cap = (msg.get("caption") or "")
+        full_cap = f"{caption_header}\n\n{cap}".strip()
+        await bot.send_photo(
+            chat_id=OWNER_ID,
+            photo=msg["file_id"],
+            caption=full_cap[:1024],
+            reply_markup=kb,
+        )
+
+    elif msg["type"] == "video":
+        cap = (msg.get("caption") or "")
+        full_cap = f"{caption_header}\n\n{cap}".strip()
+        await bot.send_video(
+            chat_id=OWNER_ID,
+            video=msg["file_id"],
+            caption=full_cap[:1024],
+            reply_markup=kb,
+        )
+
+    elif msg["type"] == "document":
+        cap = (msg.get("caption") or "")
+        full_cap = f"{caption_header}\n\n{cap}".strip()
+        await bot.send_document(
+            chat_id=OWNER_ID,
+            document=msg["file_id"],
+            caption=full_cap[:1024],
+            reply_markup=kb,
+        )
+
+    else:
+        await bot.send_message(
+            chat_id=OWNER_ID,
+            text=f"{caption_header}\n\n[Unsupported media type]",
+            reply_markup=kb,
+        )
+
+
 async def _forward_to_channel(bot, msg) -> None:
     """Post a message (original or edited) to the channel."""
     if msg.get("type") == "text":
@@ -202,34 +252,19 @@ async def receive_post(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
         "submitter_name": update.effective_user.full_name,
     })
 
-    # Owner sent it themselves → ask for direct confirmation
+    # Owner sent it themselves → show actual media + confirm button
     if uid == OWNER_ID:
-        preview = _preview_text(msg)
-        await context.bot.send_message(
-            chat_id=OWNER_ID,
-            text=f"📤 *Post to channel:*\n\n{preview}\n\nConfirm?",
-            parse_mode="Markdown",
-            reply_markup=_approval_keyboard(pending_id),
-        )
+        await _send_to_owner(context.bot, msg, "📤 Post to channel — confirm?", pending_id)
         await update.message.reply_text("✅ Queued for your confirmation.")
         return
 
-    # Another admin submitted → forward to owner for approval
-    preview = _preview_text(msg)
+    # Another admin submitted → forward the actual media to owner for approval
     submitter = update.effective_user
     name = submitter.full_name
     username = f"@{submitter.username}" if submitter.username else ""
+    header = f"📨 From {name} {username} — approve, edit or reject?"
 
-    await context.bot.send_message(
-        chat_id=OWNER_ID,
-        text=(
-            f"📨 *New post from {name} {username}:*\n\n"
-            f"{preview}\n\n"
-            f"Approve, edit or reject?"
-        ),
-        parse_mode="Markdown",
-        reply_markup=_approval_keyboard(pending_id),
-    )
+    await _send_to_owner(context.bot, msg, header, pending_id)
     await update.message.reply_text("📨 Sent to owner for approval. You'll be notified.")
 
 
