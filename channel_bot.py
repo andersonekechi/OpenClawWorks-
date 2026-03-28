@@ -216,7 +216,7 @@ async def on_approve_or_edit_or_reject(update: Update, context: ContextTypes.DEF
     # ── Approve ──────────────────────────────────────────────────────────────
     if action == "approve":
         await _post_to_channel(context.bot, msg)
-        _edit_approval_msg(query, "✅ Posted to @gscfgs7baby.")
+        await _edit_approval_msg(query, "✅ Posted to @gscfgs7baby.")
         if submitter_id != OWNER_ID:
             await context.bot.send_message(chat_id=submitter_id,
                                            text="✅ Your post was approved and published!")
@@ -226,7 +226,7 @@ async def on_approve_or_edit_or_reject(update: Update, context: ContextTypes.DEF
     # ── Edit ─────────────────────────────────────────────────────────────────
     if action == "edit":
         context.user_data["editing_pending_id"] = pending_id
-        _edit_approval_msg(query,
+        await _edit_approval_msg(query,
             "✏️ Send me the corrected version (text, photo, video or file).\n\n"
             "Send /cancel to abort.")
         return WAITING_EDIT
@@ -234,7 +234,7 @@ async def on_approve_or_edit_or_reject(update: Update, context: ContextTypes.DEF
     # ── Reject — ask for reason ───────────────────────────────────────────────
     if action == "reject":
         context.user_data["rejecting_pending_id"] = pending_id
-        _edit_approval_msg(query,
+        await _edit_approval_msg(query,
             "❌ Type your reason for rejecting this post, then send it.\n\n"
             "Or tap the button below to reject without giving a reason.",
             extra_kb=_skip_reason_keyboard(pending_id))
@@ -243,15 +243,17 @@ async def on_approve_or_edit_or_reject(update: Update, context: ContextTypes.DEF
     return ConversationHandler.END
 
 
-def _edit_approval_msg(query, text: str, extra_kb: InlineKeyboardMarkup | None = None) -> None:
-    """Edit the caption or text of the approval message."""
+async def _edit_approval_msg(query, text: str, extra_kb: InlineKeyboardMarkup | None = None) -> None:
+    """Edit the caption (media messages) or text (text messages) of the approval message."""
     try:
-        if query.message.caption is not None:
-            query.message.edit_caption(caption=text, reply_markup=extra_kb)
+        if query.message.photo or query.message.video or query.message.document:
+            await query.edit_message_caption(caption=text[:1024], reply_markup=extra_kb)
         else:
-            query.message.edit_text(text=text, reply_markup=extra_kb)
-    except Exception:
-        pass
+            await query.edit_message_text(text=text, reply_markup=extra_kb)
+    except Exception as e:
+        logger.warning(f"Could not edit approval message: {e}")
+        # Fall back to a fresh message so the owner always gets feedback
+        await query.message.reply_text(text)
 
 
 async def receive_reject_reason(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -296,7 +298,7 @@ async def skip_reject_reason(update: Update, context: ContextTypes.DEFAULT_TYPE)
 
     submitter_id = pending["submitter_id"] if pending else None
 
-    _edit_approval_msg(query, "❌ Post rejected (no reason given).")
+    await _edit_approval_msg(query, "❌ Post rejected (no reason given).")
 
     if pending and submitter_id != OWNER_ID:
         await context.bot.send_message(
