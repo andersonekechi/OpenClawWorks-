@@ -127,23 +127,31 @@ async def _send_to_approvers(bot, msg: dict, header: str, pending_id: str) -> No
                                    reply_markup=kb)
 
 
+SIGN_OFF = "\n\n— GSCF Team"
+
+
+def _append_signoff(text: str | None) -> str:
+    """Append sign-off if not already present."""
+    text = (text or "").rstrip()
+    if text.endswith("— GSCF Team"):
+        return text
+    return text + SIGN_OFF
+
+
 async def _post_to_channel(bot, msg: dict) -> None:
-    """Post a message (original or edited) to the channel."""
+    """Post a message (original or edited) to the channel, always with sign-off."""
     if msg["type"] == "text":
-        await bot.send_message(chat_id=CHANNEL_ID, text=msg["text"],
-                               entities=msg.get("entities"))
+        await bot.send_message(chat_id=CHANNEL_ID,
+                               text=_append_signoff(msg["text"]))
     elif msg["type"] == "photo":
         await bot.send_photo(chat_id=CHANNEL_ID, photo=msg["file_id"],
-                             caption=msg.get("caption"),
-                             caption_entities=msg.get("caption_entities"))
+                             caption=_append_signoff(msg.get("caption"))[:1024])
     elif msg["type"] == "video":
         await bot.send_video(chat_id=CHANNEL_ID, video=msg["file_id"],
-                             caption=msg.get("caption"),
-                             caption_entities=msg.get("caption_entities"))
+                             caption=_append_signoff(msg.get("caption"))[:1024])
     elif msg["type"] == "document":
         await bot.send_document(chat_id=CHANNEL_ID, document=msg["file_id"],
-                                caption=msg.get("caption"),
-                                caption_entities=msg.get("caption_entities"))
+                                caption=_append_signoff(msg.get("caption"))[:1024])
     else:
         await bot.forward_message(chat_id=CHANNEL_ID,
                                   from_chat_id=msg["from_chat_id"],
