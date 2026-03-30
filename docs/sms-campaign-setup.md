@@ -8,6 +8,7 @@
   - [Rejection Details](#rejection-details)
   - [Why It Failed](#why-it-failed)
   - [How to Fix It](#how-to-fix-it)
+- [Exact Text to Input for Campaign Resubmission](#exact-text-to-input-for-campaign-resubmission)
 - [Compliance Checklist](#compliance-checklist)
 - [Sample Compliant Opt-In Page](#sample-compliant-opt-in-page)
 - [References](#references)
@@ -125,6 +126,135 @@ Ensure the use case description clearly explains:
 #### Step 5: Resubmit the Campaign
 
 After making all the changes above, resubmit the campaign through your 10DLC provider's dashboard (e.g., Twilio, Vonage, Bandwidth, etc.).
+
+---
+
+## Exact Text to Input for Campaign Resubmission
+
+Below is the exact, copy-paste-ready text for every field you need to fill in when resubmitting the Hoop-Season Notifications campaign. Replace `https://hoop-season.com` with your actual domain wherever it appears.
+
+---
+
+### Field: Campaign Name
+
+```
+Hoop-Season Notifications
+```
+
+### Field: Use Case
+
+```
+Mixed
+```
+
+### Field: Sub Use Case
+
+```
+Marketing and Account Notification
+```
+
+### Field: Use Case Description
+
+Copy and paste this into the use case description field:
+
+```
+Hoop-Season sends SMS notifications to customers who have explicitly opted in through our website at https://hoop-season.com/sms-signup. Messages include order confirmations, shipping and delivery updates, new product drop announcements, exclusive promotional offers, and basketball event alerts for our e-commerce and entertainment platform. Customers opt in by entering their phone number and checking a consent checkbox on our SMS sign-up page. Customers can opt out at any time by replying STOP. Message frequency varies. Message and data rates may apply.
+```
+
+### Field: Sample Message 1 (Welcome / Opt-In Confirmation)
+
+This is the first message a subscriber receives. It **must** contain all required disclosures:
+
+```
+Welcome to Hoop-Season Notifications! You've opted in to receive order updates, delivery alerts, new product drops, exclusive promos & basketball event alerts. Msg frequency varies. Msg & data rates may apply. Reply HELP for help. Reply STOP to opt out. Terms: https://hoop-season.com/terms Privacy: https://hoop-season.com/privacy
+```
+
+### Field: Sample Message 2 (Order Confirmation — Account Notification)
+
+```
+Hoop-Season: Your order #HPS-78432 has been confirmed! We're getting it ready. You'll receive a text when it ships. Reply STOP to opt out.
+```
+
+### Field: Sample Message 3 (Shipping Update — Account Notification)
+
+```
+Hoop-Season: Your order #HPS-78432 has shipped! Track it here: https://hoop-season.com/track/HPS-78432. Estimated delivery: March 31. Reply STOP to opt out.
+```
+
+### Field: Sample Message 4 (Promotional — Marketing)
+
+```
+Hoop-Season: March Madness Sale! 25% off all jerseys this weekend only. Shop now: https://hoop-season.com/sale. Reply STOP to opt out.
+```
+
+### Field: Sample Message 5 (Event Alert — Marketing)
+
+```
+Hoop-Season: Lakers vs Celtics tonight at 7pm ET! Grab your game-day gear: https://hoop-season.com/gameday. Reply STOP to opt out.
+```
+
+### Field: Opt-In Flow Description / Call-to-Action (CTA)
+
+Copy and paste this into the opt-in flow / CTA field:
+
+```
+Customers opt in to receive SMS messages through a dedicated sign-up page on our website at https://hoop-season.com/sms-signup. On this page, customers enter their phone number and must actively check an unchecked consent checkbox before submitting. The checkbox label reads: "I agree to receive recurring automated SMS/MMS messages from Hoop-Season Notifications at the number provided, including order confirmations, delivery updates, new product drops, exclusive promotions, and basketball event alerts. Message frequency varies. Message and data rates may apply. Consent is not a condition of purchase. Reply STOP to cancel at any time. Reply HELP for help." The page also includes links to our Terms of Service (https://hoop-season.com/terms) and Privacy Policy (https://hoop-season.com/privacy). Only after checking the consent box and clicking "Sign Up" is the customer enrolled.
+```
+
+### Field: Opt-In URL
+
+```
+https://hoop-season.com/sms-signup
+```
+
+### Field: Help Message (auto-reply when user texts HELP)
+
+```
+Hoop-Season Notifications Help: For support, visit https://hoop-season.com/help or email support@hoop-season.com. To stop messages, reply STOP. Msg & data rates may apply. Msg frequency varies.
+```
+
+### Field: Stop Message (auto-reply when user texts STOP)
+
+```
+You have been unsubscribed from Hoop-Season Notifications. You will no longer receive messages. Reply START to re-subscribe. For help, visit https://hoop-season.com/help.
+```
+
+---
+
+### What Your Opt-In Page Must Look Like (Before Resubmitting)
+
+Your page at `https://hoop-season.com/sms-signup` must be **live and publicly accessible** when TCR reviews it. It must include the following elements:
+
+**1. Phone number input field**
+
+**2. An unchecked checkbox with this exact consent text next to it:**
+
+```
+I agree to receive recurring automated SMS/MMS messages from Hoop-Season Notifications at the phone number provided, including order confirmations, delivery updates, new product drops, exclusive promotions, and basketball event alerts. Message frequency varies. Message and data rates may apply. Consent is not a condition of purchase. Reply STOP to cancel at any time. Reply HELP for help.
+```
+
+**3. Links below the checkbox:**
+
+```
+By signing up, you agree to our Terms of Service and Privacy Policy.
+```
+
+Where "Terms of Service" links to `https://hoop-season.com/terms` and "Privacy Policy" links to `https://hoop-season.com/privacy`.
+
+**4. A "Sign Up" button** that only works when the checkbox is checked.
+
+---
+
+### Quick Reference: All Required URLs You Need Live
+
+| URL | What It Is | Must Be Live? |
+|-----|-----------|---------------|
+| `https://hoop-season.com/sms-signup` | SMS opt-in page with consent checkbox | **Yes** |
+| `https://hoop-season.com/privacy` | Privacy policy page | **Yes** |
+| `https://hoop-season.com/terms` | Terms of service page | **Yes** |
+| `https://hoop-season.com/help` | Help/support page | Recommended |
+
+> **Important:** Replace `hoop-season.com` with your actual website domain throughout all fields above. All URLs must be live and publicly accessible when you resubmit — TCR will check them.
 
 ---
 
