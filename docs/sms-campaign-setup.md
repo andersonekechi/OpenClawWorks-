@@ -1,316 +1,364 @@
-# SMS Campaign Setup Guide
+# SMS Campaign Setup Guide — Hoop-Season / Milone Clark
 
 ## Table of Contents
 
-- [Overview](#overview)
-- [10DLC Campaign Registration](#10dlc-campaign-registration)
-- [Campaign Failure: Hoop-Season Notifications](#campaign-failure-hoop-season-notifications)
-  - [Rejection Details](#rejection-details)
-  - [Why It Failed](#why-it-failed)
-  - [How to Fix It](#how-to-fix-it)
-- [Exact Text to Input for Campaign Resubmission](#exact-text-to-input-for-campaign-resubmission)
-- [Compliance Checklist](#compliance-checklist)
-- [Sample Compliant Opt-In Page](#sample-compliant-opt-in-page)
-- [References](#references)
+- [Company Info on File](#company-info-on-file)
+- [What Was Submitted (Original — Rejected)](#what-was-submitted-original--rejected)
+- [Exactly What Went Wrong (Problem-by-Problem)](#exactly-what-went-wrong-problem-by-problem)
+- [Things You MUST Fix BEFORE Resubmitting](#things-you-must-fix-before-resubmitting)
+- [Corrected Text for Every Field (Copy-Paste Ready)](#corrected-text-for-every-field-copy-paste-ready)
+- [Compliance Checklist (Go Through Before You Pay $45)](#compliance-checklist-go-through-before-you-pay-45)
 
 ---
 
-## Overview
+## Company Info on File
 
-To send SMS messages from a US 10DLC (10-Digit Long Code) number, you must register a use case with **The Campaign Registry (TCR)**. TCR reviews campaign registrations and can decline them if they do not meet compliance requirements set by carriers and the DCA (Direct Connect Aggregator).
-
-This document covers common reasons for campaign registration failures and provides actionable steps to resolve them.
-
----
-
-## 10DLC Campaign Registration
-
-When registering a 10DLC campaign, the following information is shared with TCR:
-
-| Field                  | Description                                                              |
-|------------------------|--------------------------------------------------------------------------|
-| **Campaign name**      | The name of your messaging campaign                                      |
-| **Use case**           | The type of messaging (e.g., Marketing, Mixed, Account Notifications)    |
-| **Sub use case**       | More specific categorization of your messaging                           |
-| **Use case description** | A detailed description of what messages you will send and to whom      |
-| **Sample messages**    | Example messages that will be sent to subscribers                        |
-| **Opt-in flow**        | How subscribers consent to receive messages                              |
-| **Call-to-action (CTA)** | The mechanism by which users agree to receive SMS messages             |
+| Field              | Value                                                  |
+|--------------------|--------------------------------------------------------|
+| Company name       | Milone Clark                                           |
+| Display name       | Hoop-Season                                            |
+| Website URL        | http://guardubasketball.wixsite.com                    |
+| Business Vertical  | Entertainment                                          |
+| Email              | gs7@baseflip.net / andy.ekechi@gmail.com               |
+| Privacy Policy URL | https://hoop-season-privacy-i0r4a26.gamma.site/        |
+| Terms of Service   | https://hoop-season-terms-n5r84zo.gamma.site/          |
+| Campaign ID        | C0PRYCZ                                                |
+| Use case           | Mixed (Marketing and Account Notification)             |
 
 ---
 
-## Campaign Failure: Hoop-Season Notifications
+## What Was Submitted (Original — Rejected)
 
-### Rejection Details
+Below is what you submitted last time, field by field.
 
-| Field                  | Value                                                  |
-|------------------------|--------------------------------------------------------|
-| **Campaign name**      | Hoop-Season Notifications                              |
-| **Campaign ID**        | C0PRYCZ                                                |
-| **Use case**           | Mixed                                                  |
-| **Sub use case**       | Marketing and Account Notification                     |
-| **Registration status**| **Declined**                                           |
-| **Rejection category** | `MANDATORY_MESSAGE_TERMINOLOGY`, `CALL_TO_ACTION`      |
-
-**Full rejection message:**
-
-> DCA declined sharing request for campaign C0PRYCZ. Rejection Category: MANDATORY_MESSAGE_TERMINOLOGY, CALL_TO_ACTION. Explanation: Unable to verify, needs compliant and accurate CTA information. Update with specific path for mobile opt-in, HELP instructions, STOP instructions, message frequency disclosure, "message and data rates may apply" disclosure and link to the message program privacy policy, or language referring to the privacy policy. (806) This could be addressed by revising your campaign messaging flow by incorporating a URL to a publicly accessible page that includes a clear opt-in statement (e.g., "I hereby agree to receive SMS") or including screenshots from any mobile app or paper form that uses similar language for consent in cases where consent is not obtained through a webpage.
-
-### Why It Failed
-
-The campaign was rejected for **two categories** of non-compliance:
-
-#### 1. MANDATORY_MESSAGE_TERMINOLOGY
-
-The sample messages or campaign description did not include the required compliance language. Every SMS campaign must ensure that messages contain or reference:
-
-- **STOP instructions** — Subscribers must know how to opt out (e.g., "Reply STOP to unsubscribe").
-- **HELP instructions** — Subscribers must know how to get help (e.g., "Reply HELP for help").
-- **Message frequency disclosure** — How often messages will be sent (e.g., "Msg frequency varies" or "Up to 4 msgs/month").
-- **"Message and data rates may apply"** — Standard carrier cost disclosure.
-- **Privacy policy link** — A link to the program's privacy policy, or language referencing it.
-
-#### 2. CALL_TO_ACTION (CTA)
-
-The opt-in flow could not be verified. TCR requires proof that subscribers are giving **express written consent** to receive SMS messages. The submission was missing:
-
-- A **publicly accessible URL** where the opt-in occurs (e.g., a website sign-up form with SMS consent checkbox).
-- **Screenshots** of a mobile app or paper form showing the consent language (if opt-in is not web-based).
-- A **clear opt-in statement** such as: *"I hereby agree to receive SMS"* or *"By providing your phone number, you consent to receive text messages from Hoop-Season."*
-
-### How to Fix It
-
-Follow these steps to resubmit the campaign successfully:
-
-#### Step 1: Create a Compliant Opt-In Page
-
-Create a **publicly accessible webpage** (or update an existing one) that includes:
-
-1. A clear opt-in checkbox or button that users must actively select.
-2. Explicit consent language, for example:
-   > "By checking this box, you agree to receive recurring SMS/MMS messages from Hoop-Season Notifications, including order confirmations, delivery updates, promotions, and event alerts. Message frequency varies. Message and data rates may apply. Reply STOP to cancel, HELP for help."
-3. A link to your **Terms of Service**.
-4. A link to your **Privacy Policy**.
-
-#### Step 2: Update Sample Messages with Required Terminology
-
-Make sure every sample message you provide includes the mandatory disclosures. At minimum, the **first message** a subscriber receives should contain:
+### Message Flow (what you had)
 
 ```
-Welcome to Hoop-Season Notifications! You'll receive order updates, delivery alerts, new product drops, exclusive promos & basketball event alerts. Msg frequency varies. Msg & data rates may apply. Reply HELP for help, STOP to opt out. Privacy: https://yoursite.com/privacy
+https://hoop-season-privacy-i0r4a26.gamma.site/
+https://hoop-season-terms-n5r84zo.gamma.site/
 ```
 
-Subsequent messages should include at least:
+### Opt-out Message (what you had)
 
 ```
-Hoop-Season: Your order #12345 has shipped! Track it here: https://yoursite.com/track/12345. Reply STOP to opt out.
+You have been unsubscribed from Hoop-Season messages. You will no longer receive SMS from us. Reply START to resubscribe anytime.
 ```
 
-#### Step 3: Provide the Opt-In URL or Screenshots
+### Help Message (what you had)
 
-When resubmitting the campaign:
+```
+Hoop-Season Support: For help visit https://hoop-season-privacy-i0r4a26.gamma.site/ or email gs7@baseflip.net. Reply STOP to unsubscribe or...
+```
 
-- **If opt-in is on a website:** Provide the full URL to the page where users subscribe (e.g., `https://hoop-season.com/sms-signup`). The page must be **live and publicly accessible** at the time of review.
-- **If opt-in is in a mobile app:** Provide **screenshots** of the app screen where consent is collected, showing the full consent language.
-- **If opt-in is on a paper form:** Provide **photos or scans** of the form showing the consent language.
+### Sample Message 1 (what you had)
 
-#### Step 4: Update the Campaign Description
+```
+Hoop-Season: Your order #[ORDER_ID] is confirmed! Track delivery here: [LINK]. Reply STOP to opt out.
+```
 
-Ensure the use case description clearly explains:
+### Sample Message 2 (what you had)
 
-- **Who** receives messages (opted-in customers).
-- **What** types of messages are sent (order confirmations, delivery updates, promotions, event alerts).
-- **How** users opt in (web form, app, etc.).
-- **How** users opt out (Reply STOP).
+```
+Hoop-Season Alert: New collection just dropped! Limited stock available. Shop now: [LINK]. Reply STOP to opt out.
+```
 
-#### Step 5: Resubmit the Campaign
+### Sample Message 3 (what you had)
 
-After making all the changes above, resubmit the campaign through your 10DLC provider's dashboard (e.g., Twilio, Vonage, Bandwidth, etc.).
+```
+Hey [NAME], exclusive deal just for you! 20% off today only. Use code HOOP20 at: [LINK]. Reply STOP to opt out.
+```
 
 ---
 
-## Exact Text to Input for Campaign Resubmission
+## Exactly What Went Wrong (Problem-by-Problem)
 
-Below is the exact, copy-paste-ready text for every field you need to fill in when resubmitting the Hoop-Season Notifications campaign. Replace `https://hoop-season.com` with your actual domain wherever it appears.
+Your campaign was rejected for two categories: **MANDATORY_MESSAGE_TERMINOLOGY** and **CALL_TO_ACTION**. Here is every specific issue.
+
+### Problem 1: Message Flow field only had URLs — no description
+
+**What you did:** You just pasted two URLs (privacy policy and terms).
+
+**What TCR needs:** A detailed written description (200–2000 characters) of exactly HOW customers opt in to receive texts. This must explain where the opt-in happens, what the user sees, what they click, and include the full consent language. Just listing URLs is not enough — the reviewer has to be able to read your description and instantly understand the opt-in process.
+
+### Problem 2: No opt-in page exists
+
+**What TCR needs:** A publicly accessible URL where users can opt in to SMS messages. This is the most important thing. The reviewer will visit this URL to verify it exists, is live, and contains proper consent language.
+
+**The issue:** Your main website `http://guardubasketball.wixsite.com` currently returns a 404 error — it is not accessible. Even if it were accessible, you need a specific page or section on the site where users explicitly opt in to text messages with a checkbox and consent language.
+
+### Problem 3: Sample messages are missing mandatory terminology
+
+Every sample message was missing these required items:
+
+| Required Term                        | Present in your messages? |
+|--------------------------------------|---------------------------|
+| "Reply STOP to opt out"              | Yes (you had this)        |
+| "Reply HELP for help"                | **NO — missing**          |
+| "Msg & data rates may apply"         | **NO — missing**          |
+| Message frequency disclosure         | **NO — missing**          |
+| Privacy policy link or reference     | **NO — missing**          |
+| Brand name (Hoop-Season)             | Mostly yes                |
+
+The **first message** a subscriber receives (the opt-in confirmation / welcome message) MUST contain ALL of these. You did not have a welcome/opt-in confirmation message at all — your Sample Message 1 was an order confirmation, which means the very first mandatory message was missing entirely.
+
+### Problem 4: Help message linked to the privacy page
+
+**What you had:** The HELP auto-reply linked to `https://hoop-season-privacy-i0r4a26.gamma.site/` — this is a privacy policy page, not a help/support page.
+
+**What TCR requires:** The HELP message must contain: brand name, contact information (email OR phone OR website for support), opt-in keyword, opt-out keyword, and "Msg & data rates may apply."
+
+### Problem 5: Privacy Policy is missing the required SMS opt-in data sentence
+
+**What TCR specifically requires** in your privacy policy (word for word):
+
+> "Text messaging opt-in data and consent will not be shared with any third parties."
+
+Your privacy policy at `https://hoop-season-privacy-i0r4a26.gamma.site/` says "We do not sell your personal information" — but that is NOT specific enough. TCR requires an explicit statement about **text messaging opt-in data** specifically. This exact sentence must be added to your privacy policy.
+
+### Problem 6: Opt-in consent language must be SMS-specific only
+
+TCR requires that the opt-in language is **exclusively for text messages**. It cannot be bundled with email consent, phone call consent, or general marketing consent. It must be a separate, standalone checkbox or action just for SMS.
 
 ---
 
-### Field: Campaign Name
+## Things You MUST Fix BEFORE Resubmitting
+
+Do NOT pay $45 to resubmit until ALL of these are done. The reviewer will check each one.
+
+### Fix 1: Make your website accessible
+
+Your website `http://guardubasketball.wixsite.com` currently returns 404 (page not found). You need to either:
+- Fix the Wix site so it loads properly, OR
+- Use a different URL that is live
+
+The website URL you registered with the brand must be working.
+
+### Fix 2: Create an SMS opt-in page on your website
+
+You need a page on your website (e.g., `http://guardubasketball.wixsite.com/sms-signup` or a section on your homepage) that has:
+
+1. A phone number input field
+2. An **unchecked** checkbox (must NOT be pre-checked) with this consent text:
 
 ```
-Hoop-Season Notifications
+By providing your phone number and checking this box, you consent to receive recurring
+automated SMS/MMS messages from Hoop-Season, including order confirmations, delivery
+updates, new product drops, exclusive promotions, and basketball event alerts. Message
+frequency varies. Message and data rates may apply. Consent is not a condition of
+purchase. Reply STOP to cancel at any time. Reply HELP for help.
 ```
 
-### Field: Use Case
+3. Links to your Privacy Policy and Terms of Service directly under the checkbox
+4. A "Sign Up" or "Subscribe" button
+
+**The phone number field should NOT be marked as required** — TCR considers a mandatory phone field as "forced opt-in."
+
+### Fix 3: Add the required sentence to your Privacy Policy
+
+Open your privacy policy at `https://hoop-season-privacy-i0r4a26.gamma.site/` and add this exact text to the SMS section (Section 3):
 
 ```
-Mixed
+Text messaging opt-in data and consent will not be shared with any third parties.
+We will not share your opt-in to an SMS campaign with any third party for purposes
+unrelated to providing you with the services of that campaign. We may share your
+Personal Data, including your SMS opt-in or consent status, with third parties that
+help us provide our messaging services, including but not limited to platform providers,
+phone companies, and any other vendors who assist us in the delivery of text messages.
 ```
 
-### Field: Sub Use Case
+### Fix 4: Verify all your links are live
+
+Before resubmitting, open each of these in a browser and confirm they load:
+
+| URL | Status You Need |
+|-----|-----------------|
+| `http://guardubasketball.wixsite.com` | Must load (currently 404!) |
+| `https://hoop-season-privacy-i0r4a26.gamma.site/` | Currently working |
+| `https://hoop-season-terms-n5r84zo.gamma.site/` | Currently working |
+| Your SMS opt-in page URL | Must be live and show the consent form |
+
+---
+
+## Corrected Text for Every Field (Copy-Paste Ready)
+
+Replace `[YOUR-SMS-SIGNUP-URL]` below with the actual URL of your SMS opt-in page once you create it (e.g., `http://guardubasketball.wixsite.com/sms-signup`).
+
+---
+
+### Field: Message Flow
+
+This is the most important field. Copy and paste this entire block:
 
 ```
-Marketing and Account Notification
+Customers opt in to receive SMS messages through a dedicated sign-up section on our
+website at [YOUR-SMS-SIGNUP-URL]. On this page, customers enter their phone number
+and must actively check an unchecked consent checkbox before submitting. The checkbox
+label reads: "By providing your phone number and checking this box, you consent to
+receive recurring automated SMS/MMS messages from Hoop-Season, including order
+confirmations, delivery updates, new product drops, exclusive promotions, and
+basketball event alerts. Message frequency varies. Message and data rates may apply.
+Consent is not a condition of purchase. Reply STOP to cancel at any time. Reply HELP
+for help." The page includes links to our Privacy Policy
+(https://hoop-season-privacy-i0r4a26.gamma.site/) and Terms of Service
+(https://hoop-season-terms-n5r84zo.gamma.site/). Only after checking the consent
+checkbox and clicking "Sign Up" is the customer enrolled in SMS messaging. The
+phone number field is optional and not forced. Opt-in is exclusively for text
+messages and is separate from any email or phone call consent.
+
+Privacy Policy: https://hoop-season-privacy-i0r4a26.gamma.site/
+Terms of Service: https://hoop-season-terms-n5r84zo.gamma.site/
 ```
+
+---
+
+### Field: Opt-out Keywords
+
+```
+STOP
+```
+
+---
+
+### Field: Opt-out Message
+
+```
+Hoop-Season: You have been unsubscribed and will no longer receive SMS messages from Hoop-Season. No further messages will be sent. Reply START to re-subscribe. Msg & data rates may apply.
+```
+
+**What changed from your original:** Added brand name at the start, added "No further messages will be sent" (required by TCR), added "Msg & data rates may apply."
+
+---
+
+### Field: Help Keywords
+
+```
+HELP
+```
+
+---
+
+### Field: Help Message
+
+```
+Hoop-Season: For help, visit https://hoop-season-terms-n5r84zo.gamma.site/ or email gs7@baseflip.net. Msg frequency varies. Msg & data rates may apply. Reply STOP to opt out of SMS. Reply START to subscribe.
+```
+
+**What changed from your original:** Removed link to privacy page (that's not a help page). Added message frequency, data rates, and opt-in/opt-out keywords — all required by TCR for the HELP response.
+
+---
+
+### Field: Opt-in Keywords
+
+```
+START
+```
+
+---
+
+### Field: Opt-in Message (Opt-in Confirmation / Welcome Message)
+
+```
+Hoop-Season: You're now signed up for SMS notifications! You'll receive order confirmations, delivery updates, new product drops, exclusive promos & basketball event alerts. Msg frequency varies. Msg & data rates may apply. Reply HELP for help. Reply STOP to opt out. Privacy: https://hoop-season-privacy-i0r4a26.gamma.site/ Terms: https://hoop-season-terms-n5r84zo.gamma.site/
+```
+
+**Why this matters:** This is the FIRST message every subscriber receives. TCR requires it to contain: brand name, what messages they'll receive, frequency, data rates, HELP keyword, STOP keyword, and links to privacy/terms. You did not have this message at all in your original submission.
+
+---
+
+### Field: Sample Message 1 (Order Confirmation — Account Notification)
+
+```
+Hoop-Season: Your order #HPS-78432 is confirmed! Track delivery here: https://guardubasketball.wixsite.com/track. Reply HELP for help. Reply STOP to opt out. Msg & data rates may apply.
+```
+
+**What changed from your original:** Added "Reply HELP for help" and "Msg & data rates may apply." Replaced `[ORDER_ID]` with a realistic example and `[LINK]` with a realistic URL. TCR reviewers want to see realistic sample messages, not templates with placeholders.
+
+---
+
+### Field: Sample Message 2 (New Product Drop — Marketing)
+
+```
+Hoop-Season Alert: New collection just dropped! Limited stock available. Shop now: https://guardubasketball.wixsite.com/shop. Reply HELP for help. Reply STOP to opt out. Msg & data rates may apply.
+```
+
+**What changed from your original:** Added "Reply HELP for help" and "Msg & data rates may apply." Replaced `[LINK]` with a realistic URL.
+
+---
+
+### Field: Sample Message 3 (Promotional — Marketing)
+
+```
+Hoop-Season: Exclusive deal for you! 20% off today only. Use code HOOP20 at: https://guardubasketball.wixsite.com/shop. Reply HELP for help. Reply STOP to opt out. Msg & data rates may apply.
+```
+
+**What changed from your original:** Removed "Hey [NAME]" (placeholders look unprofessional to reviewers). Added "Reply HELP for help" and "Msg & data rates may apply." Added brand name at start. Replaced `[LINK]` with realistic URL.
+
+---
 
 ### Field: Use Case Description
 
-Copy and paste this into the use case description field:
-
 ```
-Hoop-Season sends SMS notifications to customers who have explicitly opted in through our website at https://hoop-season.com/sms-signup. Messages include order confirmations, shipping and delivery updates, new product drop announcements, exclusive promotional offers, and basketball event alerts for our e-commerce and entertainment platform. Customers opt in by entering their phone number and checking a consent checkbox on our SMS sign-up page. Customers can opt out at any time by replying STOP. Message frequency varies. Message and data rates may apply.
-```
-
-### Field: Sample Message 1 (Welcome / Opt-In Confirmation)
-
-This is the first message a subscriber receives. It **must** contain all required disclosures:
-
-```
-Welcome to Hoop-Season Notifications! You've opted in to receive order updates, delivery alerts, new product drops, exclusive promos & basketball event alerts. Msg frequency varies. Msg & data rates may apply. Reply HELP for help. Reply STOP to opt out. Terms: https://hoop-season.com/terms Privacy: https://hoop-season.com/privacy
-```
-
-### Field: Sample Message 2 (Order Confirmation — Account Notification)
-
-```
-Hoop-Season: Your order #HPS-78432 has been confirmed! We're getting it ready. You'll receive a text when it ships. Reply STOP to opt out.
-```
-
-### Field: Sample Message 3 (Shipping Update — Account Notification)
-
-```
-Hoop-Season: Your order #HPS-78432 has shipped! Track it here: https://hoop-season.com/track/HPS-78432. Estimated delivery: March 31. Reply STOP to opt out.
-```
-
-### Field: Sample Message 4 (Promotional — Marketing)
-
-```
-Hoop-Season: March Madness Sale! 25% off all jerseys this weekend only. Shop now: https://hoop-season.com/sale. Reply STOP to opt out.
-```
-
-### Field: Sample Message 5 (Event Alert — Marketing)
-
-```
-Hoop-Season: Lakers vs Celtics tonight at 7pm ET! Grab your game-day gear: https://hoop-season.com/gameday. Reply STOP to opt out.
-```
-
-### Field: Opt-In Flow Description / Call-to-Action (CTA)
-
-Copy and paste this into the opt-in flow / CTA field:
-
-```
-Customers opt in to receive SMS messages through a dedicated sign-up page on our website at https://hoop-season.com/sms-signup. On this page, customers enter their phone number and must actively check an unchecked consent checkbox before submitting. The checkbox label reads: "I agree to receive recurring automated SMS/MMS messages from Hoop-Season Notifications at the number provided, including order confirmations, delivery updates, new product drops, exclusive promotions, and basketball event alerts. Message frequency varies. Message and data rates may apply. Consent is not a condition of purchase. Reply STOP to cancel at any time. Reply HELP for help." The page also includes links to our Terms of Service (https://hoop-season.com/terms) and Privacy Policy (https://hoop-season.com/privacy). Only after checking the consent box and clicking "Sign Up" is the customer enrolled.
-```
-
-### Field: Opt-In URL
-
-```
-https://hoop-season.com/sms-signup
-```
-
-### Field: Help Message (auto-reply when user texts HELP)
-
-```
-Hoop-Season Notifications Help: For support, visit https://hoop-season.com/help or email support@hoop-season.com. To stop messages, reply STOP. Msg & data rates may apply. Msg frequency varies.
-```
-
-### Field: Stop Message (auto-reply when user texts STOP)
-
-```
-You have been unsubscribed from Hoop-Season Notifications. You will no longer receive messages. Reply START to re-subscribe. For help, visit https://hoop-season.com/help.
+Hoop-Season sends SMS notifications to customers who have explicitly opted in through our website at [YOUR-SMS-SIGNUP-URL]. Messages include order confirmations, shipping and delivery updates, new product drop announcements, exclusive promotional offers, and basketball event alerts for our e-commerce and entertainment platform. Customers opt in by entering their phone number and checking a consent checkbox on our SMS sign-up page. Opt-in is exclusively for SMS and is separate from email or other communications. Customers can opt out at any time by replying STOP. Message frequency varies. Message and data rates may apply.
 ```
 
 ---
 
-### What Your Opt-In Page Must Look Like (Before Resubmitting)
+## Compliance Checklist (Go Through Before You Pay $45)
 
-Your page at `https://hoop-season.com/sms-signup` must be **live and publicly accessible** when TCR reviews it. It must include the following elements:
+Go through every single item. Do NOT submit until every box is checked.
 
-**1. Phone number input field**
+### Website & Pages
 
-**2. An unchecked checkbox with this exact consent text next to it:**
+- [ ] `http://guardubasketball.wixsite.com` loads successfully (no 404)
+- [ ] SMS opt-in page exists at a specific URL and is publicly accessible
+- [ ] Opt-in page has a phone number field (NOT marked as required)
+- [ ] Opt-in page has an **unchecked** checkbox with the full consent text
+- [ ] Consent text mentions: SMS messages, Hoop-Season brand, message types, frequency varies, data rates, STOP, HELP
+- [ ] Consent text is **only for SMS** — does NOT bundle email or phone call consent
+- [ ] Privacy Policy and Terms of Service are linked directly on the opt-in page
+- [ ] `https://hoop-season-privacy-i0r4a26.gamma.site/` loads correctly
+- [ ] `https://hoop-season-terms-n5r84zo.gamma.site/` loads correctly
 
-```
-I agree to receive recurring automated SMS/MMS messages from Hoop-Season Notifications at the phone number provided, including order confirmations, delivery updates, new product drops, exclusive promotions, and basketball event alerts. Message frequency varies. Message and data rates may apply. Consent is not a condition of purchase. Reply STOP to cancel at any time. Reply HELP for help.
-```
+### Privacy Policy
 
-**3. Links below the checkbox:**
+- [ ] Privacy policy contains the sentence: "Text messaging opt-in data and consent will not be shared with any third parties."
+- [ ] Privacy policy mentions STOP to opt out
+- [ ] Privacy policy mentions HELP for assistance
 
-```
-By signing up, you agree to our Terms of Service and Privacy Policy.
-```
+### Campaign Registration Fields
 
-Where "Terms of Service" links to `https://hoop-season.com/terms` and "Privacy Policy" links to `https://hoop-season.com/privacy`.
+- [ ] **Message Flow** describes the full opt-in process (not just URLs)
+- [ ] **Message Flow** includes the opt-in page URL
+- [ ] **Message Flow** includes the full consent checkbox language
+- [ ] **Message Flow** states the phone number field is optional
+- [ ] **Message Flow** states opt-in is exclusively for SMS
+- [ ] **Opt-out message** includes brand name, confirmation no more messages, and START keyword
+- [ ] **Help message** includes brand name, contact info, frequency, data rates, STOP and START keywords
+- [ ] **Opt-in confirmation message** includes brand name, message types, frequency, data rates, HELP, STOP, privacy link, terms link
 
-**4. A "Sign Up" button** that only works when the checkbox is checked.
+### Sample Messages
 
----
-
-### Quick Reference: All Required URLs You Need Live
-
-| URL | What It Is | Must Be Live? |
-|-----|-----------|---------------|
-| `https://hoop-season.com/sms-signup` | SMS opt-in page with consent checkbox | **Yes** |
-| `https://hoop-season.com/privacy` | Privacy policy page | **Yes** |
-| `https://hoop-season.com/terms` | Terms of service page | **Yes** |
-| `https://hoop-season.com/help` | Help/support page | Recommended |
-
-> **Important:** Replace `hoop-season.com` with your actual website domain throughout all fields above. All URLs must be live and publicly accessible when you resubmit — TCR will check them.
-
----
-
-## Compliance Checklist
-
-Use this checklist before submitting any SMS campaign:
-
-- [ ] **Opt-in page** is publicly accessible and live
-- [ ] **Opt-in language** explicitly mentions SMS/text messages
-- [ ] **Consent is affirmative** (checkbox, button, or keyword — not pre-checked)
-- [ ] **STOP instructions** included in sample messages ("Reply STOP to unsubscribe")
-- [ ] **HELP instructions** included in sample messages ("Reply HELP for help")
-- [ ] **Message frequency** disclosed ("Message frequency varies" or specific count)
-- [ ] **"Message and data rates may apply"** included
-- [ ] **Privacy policy** linked on the opt-in page and referenced in messages
-- [ ] **Terms of service** linked on the opt-in page
-- [ ] **Campaign description** accurately reflects message content and audience
-- [ ] **Sample messages** are realistic and include all required disclosures
+- [ ] Every sample message starts with "Hoop-Season" (brand name)
+- [ ] Every sample message includes "Reply STOP to opt out"
+- [ ] Every sample message includes "Reply HELP for help"
+- [ ] Every sample message includes "Msg & data rates may apply"
+- [ ] No placeholder text like `[NAME]`, `[LINK]`, `[ORDER_ID]` — use realistic examples
+- [ ] At least one sample message is for account notifications (order confirmation)
+- [ ] At least one sample message is for marketing (promo/product drop)
+- [ ] Sample messages match the "Mixed" use case (both marketing AND account notification)
 
 ---
 
-## Sample Compliant Opt-In Page
+## Summary of All Changes From Original Submission
 
-Below is an example of the language your SMS sign-up page should include:
-
-```
-┌──────────────────────────────────────────────────────┐
-│                                                      │
-│   📱 Sign Up for Hoop-Season Text Alerts             │
-│                                                      │
-│   Phone Number: [_______________]                    │
-│                                                      │
-│   [ ] I agree to receive recurring automated         │
-│       SMS/MMS messages from Hoop-Season              │
-│       Notifications at the phone number provided,    │
-│       including order confirmations, delivery         │
-│       updates, new product drops, exclusive           │
-│       promotions, and basketball event alerts.        │
-│       Message frequency varies. Message and data      │
-│       rates may apply. Consent is not a condition     │
-│       of purchase. Reply STOP to cancel at any        │
-│       time. Reply HELP for help.                      │
-│                                                      │
-│   By signing up, you agree to our Terms of Service   │
-│   (link) and Privacy Policy (link).                  │
-│                                                      │
-│   [  Sign Up  ]                                      │
-│                                                      │
-└──────────────────────────────────────────────────────┘
-```
-
----
-
-## References
-
-- [CTIA Messaging Principles and Best Practices](https://www.ctia.org/the-wireless-industry/industry-commitments/messaging-principles-and-best-practices)
-- [TCR Campaign Registry](https://www.campaignregistry.com/)
-- [10DLC Overview — Twilio](https://www.twilio.com/docs/messaging/guides/10dlc)
-- [TCPA Compliance Guide](https://www.fcc.gov/consumers/guides/stop-unwanted-robocalls-and-texts)
+| Field | What Was Wrong | What to Fix |
+|-------|---------------|-------------|
+| Message Flow | Only had 2 URLs, no description | Full written description of opt-in process |
+| Opt-in page | Did not exist | Create one on your website with consent checkbox |
+| Website | Returns 404 | Fix so it loads |
+| Privacy Policy | Missing required SMS data-sharing sentence | Add "Text messaging opt-in data and consent will not be shared with any third parties" |
+| Sample Messages | Missing HELP, data rates, frequency | Add to every message |
+| Welcome Message | Did not exist | Add opt-in confirmation with all disclosures |
+| Help Message | Linked to privacy page, missing terms | Link to support/terms, add frequency and data rates |
+| Opt-out Message | Missing brand name at start, missing "no further messages" | Add both |
+| Sample Message placeholders | Had [NAME], [LINK], [ORDER_ID] | Replace with realistic examples |
